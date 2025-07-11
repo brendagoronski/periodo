@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'main.dart';
+import 'profile_page.dart';
 
 class TelaSintomas extends StatefulWidget {
   final DateTime diaSelecionado;
@@ -45,7 +47,7 @@ class _TelaSintomasState extends State<TelaSintomas> {
       child: Column(
         children: [
           Container(
-            padding: EdgeInsets.all(12),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: selecionado ? Colors.pink : Colors.grey[850],
               borderRadius: BorderRadius.circular(12),
@@ -53,8 +55,8 @@ class _TelaSintomasState extends State<TelaSintomas> {
             ),
             child: Icon(icone, color: Colors.white, size: 28),
           ),
-          SizedBox(height: 4),
-          Text(texto, style: TextStyle(color: Colors.white70)),
+          const SizedBox(height: 4),
+          Text(texto, style: const TextStyle(color: Colors.white70)),
         ],
       ),
     );
@@ -64,16 +66,16 @@ class _TelaSintomasState extends State<TelaSintomas> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(height: 16),
+        const SizedBox(height: 16),
         Text(
           titulo,
-          style: TextStyle(
+          style: const TextStyle(
             color: Colors.pinkAccent,
             fontWeight: FontWeight.bold,
             fontSize: 16,
           ),
         ),
-        SizedBox(height: 8),
+        const SizedBox(height: 8),
         Wrap(spacing: 12, runSpacing: 12, children: botoes),
       ],
     );
@@ -85,7 +87,7 @@ class _TelaSintomasState extends State<TelaSintomas> {
         coletaSelecionada == null &&
         relacaoSelecionada == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('Selecione pelo menos um dado antes de salvar.'),
           backgroundColor: Colors.pink,
         ),
@@ -107,21 +109,27 @@ class _TelaSintomasState extends State<TelaSintomas> {
       builder:
           (context) => AlertDialog(
             backgroundColor: Colors.black,
-            title: Text(
+            title: const Text(
               'Remover registro',
               style: TextStyle(color: Colors.pink),
             ),
             content: Text(
               'Deseja realmente remover os dados do dia ${widget.diaSelecionado.day}/${widget.diaSelecionado.month}?',
-              style: TextStyle(color: Colors.white),
+              style: const TextStyle(color: Colors.white),
             ),
             actions: [
               TextButton(
-                child: Text('Cancelar', style: TextStyle(color: Colors.pink)),
+                child: const Text(
+                  'Cancelar',
+                  style: TextStyle(color: Colors.pink),
+                ),
                 onPressed: () => Navigator.pop(context, false),
               ),
               TextButton(
-                child: Text('Remover', style: TextStyle(color: Colors.pink)),
+                child: const Text(
+                  'Remover',
+                  style: TextStyle(color: Colors.pink),
+                ),
                 onPressed: () => Navigator.pop(context, true),
               ),
             ],
@@ -145,7 +153,7 @@ class _TelaSintomasState extends State<TelaSintomas> {
             children: [
               Text(
                 "Monitorar Dia ${widget.diaSelecionado.day}/${widget.diaSelecionado.month}",
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
@@ -282,28 +290,28 @@ class _TelaSintomasState extends State<TelaSintomas> {
                       () => setState(() => relacaoSelecionada = "Não houve"),
                 ),
               ]),
-              SizedBox(height: 24),
+              const SizedBox(height: 24),
               Center(
                 child: Column(
                   children: [
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.pink,
-                        padding: EdgeInsets.symmetric(
+                        padding: const EdgeInsets.symmetric(
                           horizontal: 40,
                           vertical: 12,
                         ),
                       ),
                       onPressed: _salvarDados,
-                      child: Text(
+                      child: const Text(
                         "Salvar",
                         style: TextStyle(color: Colors.white, fontSize: 16),
                       ),
                     ),
-                    SizedBox(height: 12),
+                    const SizedBox(height: 12),
                     TextButton(
                       onPressed: _confirmarRemocao,
-                      child: Text(
+                      child: const Text(
                         "Remover este dia",
                         style: TextStyle(color: Colors.white70),
                       ),
@@ -314,6 +322,37 @@ class _TelaSintomasState extends State<TelaSintomas> {
             ],
           ),
         ),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: Colors.black,
+        selectedItemColor: Colors.pink,
+        unselectedItemColor: Colors.white54,
+        onTap: (index) {
+          if (index == 0) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const TelaCalendario()),
+            );
+          } else if (index == 1) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder:
+                    (context) => TelaSintomas(diaSelecionado: DateTime.now()),
+              ),
+            );
+          } else if (index == 2) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const TelaPerfil()),
+            );
+          }
+        },
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Início'),
+          BottomNavigationBarItem(icon: Icon(Icons.opacity), label: 'Hoje'),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Perfil'),
+        ],
       ),
     );
   }

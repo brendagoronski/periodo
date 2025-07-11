@@ -4,6 +4,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'symptom_page.dart';
+import 'profile_page.dart'; // NOVO IMPORT
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -80,7 +81,6 @@ class _TelaCalendarioState extends State<TelaCalendario> {
   void _calcularPrevisoes() {
     if (_diasMenstruada.isEmpty) return;
     final ultimaData = _diasMenstruada.reduce((a, b) => a.isAfter(b) ? a : b);
-
     _detectarIniciosDeCiclo();
 
     if (_iniciosDeCiclo.length >= 3) {
@@ -148,8 +148,7 @@ class _TelaCalendarioState extends State<TelaCalendario> {
     }
 
     if (sintomasStr != null) {
-      final Map<String, dynamic> mapa =
-          jsonDecode(sintomasStr) as Map<String, dynamic>;
+      final Map<String, dynamic> mapa = jsonDecode(sintomasStr);
       _sintomasPorDia.clear();
       mapa.forEach((k, v) {
         _sintomasPorDia[DateTime.parse(k)] = jsonDecode(v);
@@ -399,6 +398,37 @@ class _TelaCalendarioState extends State<TelaCalendario> {
             ),
           ],
         ),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: Colors.black,
+        selectedItemColor: Colors.pink,
+        unselectedItemColor: Colors.white54,
+        onTap: (index) {
+          if (index == 0) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const TelaCalendario()),
+            );
+          } else if (index == 1) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder:
+                    (context) => TelaSintomas(diaSelecionado: DateTime.now()),
+              ),
+            );
+          } else if (index == 2) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const TelaPerfil()),
+            );
+          }
+        },
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Início'),
+          BottomNavigationBarItem(icon: Icon(Icons.opacity), label: 'Hoje'),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Perfil'),
+        ],
       ),
     );
   }

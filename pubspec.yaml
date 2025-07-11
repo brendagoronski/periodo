@@ -3,30 +3,22 @@ description: "A new Flutter project."
 
 publish_to: 'none'
 
-
 version: 1.0.0+1
 
 environment:
   sdk: ^3.7.2
 
-
 dependencies:
   flutter:
     sdk: flutter
   table_calendar: ^3.0.8
-  intl: any
-  shared_preferences: any
-  flutter_local_notifications: ^15.1.1
-  csv: ^5.0.2
-  path_provider: ^2.1.1
-  permission_handler: ^11.3.0
+  intl: ^0.18.0
+  shared_preferences: ^2.1.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
   flutter_lints: ^5.0.0
 
 flutter:
-
   uses-material-design: true
