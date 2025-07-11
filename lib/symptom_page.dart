@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'main.dart';
 import 'profile_page.dart';
 
+/// Tela para registrar sintomas, fluxo, coleta e relação sexual de um dia específico.
 class TelaSintomas extends StatefulWidget {
   final DateTime diaSelecionado;
   final Map<String, dynamic>? dadosIniciais;
@@ -17,18 +18,23 @@ class TelaSintomas extends StatefulWidget {
 }
 
 class _TelaSintomasState extends State<TelaSintomas> {
+  // ---------- ESTADO ----------
   String? fluxoSelecionado;
   Set<String> sintomasSelecionados = {};
   String? coletaSelecionada;
   String? relacaoSelecionada;
 
+  // ---------- INICIALIZAÇÃO DO ESTADO ----------
   @override
   void initState() {
     super.initState();
+
+    // Carrega dados iniciais, caso existam
     if (widget.dadosIniciais != null) {
       fluxoSelecionado = widget.dadosIniciais!['fluxo'];
       coletaSelecionada = widget.dadosIniciais!['coleta'];
       relacaoSelecionada = widget.dadosIniciais!['relacao'];
+
       final sintomas = widget.dadosIniciais!['sintomas'];
       if (sintomas is List) {
         sintomasSelecionados = sintomas.map((e) => e.toString()).toSet();
@@ -36,6 +42,9 @@ class _TelaSintomasState extends State<TelaSintomas> {
     }
   }
 
+  // ---------- WIDGETS AUXILIARES ----------
+
+  /// Botão customizado para seleção com ícone e texto
   Widget botaoSelecao(
     String texto,
     IconData icone, {
@@ -62,6 +71,7 @@ class _TelaSintomasState extends State<TelaSintomas> {
     );
   }
 
+  /// Seção com título e vários botões (exemplo: fluxo, sintomas, coleta)
   Widget secao(String titulo, List<Widget> botoes) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -81,8 +91,11 @@ class _TelaSintomasState extends State<TelaSintomas> {
     );
   }
 
+  // ---------- AÇÕES ----------
+
+  /// Salva os dados selecionados e retorna para a tela anterior
   void _salvarDados() {
-    // Não deixa salvar vazio
+    // Verifica se algum dado foi selecionado
     if (fluxoSelecionado == null &&
         sintomasSelecionados.isEmpty &&
         coletaSelecionada == null &&
@@ -96,7 +109,7 @@ class _TelaSintomasState extends State<TelaSintomas> {
       return;
     }
 
-    // Retorna os dados para o main
+    // Retorna os dados para a tela anterior (Calendário)
     Navigator.pop(context, {
       'fluxo': fluxoSelecionado,
       'sintomas': sintomasSelecionados.toList(),
@@ -105,6 +118,7 @@ class _TelaSintomasState extends State<TelaSintomas> {
     });
   }
 
+  /// Mostra diálogo confirmando remoção dos dados do dia
   Future<void> _confirmarRemocao() async {
     final confirmado = await showDialog<bool>(
       context: context,
@@ -143,10 +157,14 @@ class _TelaSintomasState extends State<TelaSintomas> {
     }
   }
 
+  // ---------- BUILD ----------
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
+
+      // AppBar com título do dia e botão voltar
       appBar: AppBar(
         title: Text(
           "Monitorar Dia ${widget.diaSelecionado.day}/${widget.diaSelecionado.month}",
@@ -158,12 +176,15 @@ class _TelaSintomasState extends State<TelaSintomas> {
           onPressed: () => Navigator.pop(context),
         ),
       ),
+
+      // Corpo rolável com seções e botões
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Seção fluxo menstrual
               secao("Fluxo Menstrual", [
                 botaoSelecao(
                   "Leve",
@@ -171,11 +192,8 @@ class _TelaSintomasState extends State<TelaSintomas> {
                   selecionado: fluxoSelecionado == "Leve",
                   aoClicar: () {
                     setState(() {
-                      if (fluxoSelecionado == "Leve") {
-                        fluxoSelecionado = null; // desclicar
-                      } else {
-                        fluxoSelecionado = "Leve";
-                      }
+                      fluxoSelecionado =
+                          fluxoSelecionado == "Leve" ? null : "Leve";
                     });
                   },
                 ),
@@ -185,11 +203,8 @@ class _TelaSintomasState extends State<TelaSintomas> {
                   selecionado: fluxoSelecionado == "Médio",
                   aoClicar: () {
                     setState(() {
-                      if (fluxoSelecionado == "Médio") {
-                        fluxoSelecionado = null;
-                      } else {
-                        fluxoSelecionado = "Médio";
-                      }
+                      fluxoSelecionado =
+                          fluxoSelecionado == "Médio" ? null : "Médio";
                     });
                   },
                 ),
@@ -199,11 +214,8 @@ class _TelaSintomasState extends State<TelaSintomas> {
                   selecionado: fluxoSelecionado == "Intenso",
                   aoClicar: () {
                     setState(() {
-                      if (fluxoSelecionado == "Intenso") {
-                        fluxoSelecionado = null;
-                      } else {
-                        fluxoSelecionado = "Intenso";
-                      }
+                      fluxoSelecionado =
+                          fluxoSelecionado == "Intenso" ? null : "Intenso";
                     });
                   },
                 ),
@@ -213,15 +225,14 @@ class _TelaSintomasState extends State<TelaSintomas> {
                   selecionado: fluxoSelecionado == "Muito",
                   aoClicar: () {
                     setState(() {
-                      if (fluxoSelecionado == "Muito") {
-                        fluxoSelecionado = null;
-                      } else {
-                        fluxoSelecionado = "Muito";
-                      }
+                      fluxoSelecionado =
+                          fluxoSelecionado == "Muito" ? null : "Muito";
                     });
                   },
                 ),
               ]),
+
+              // Seção sintomas
               secao("Dores/Sintomas", [
                 botaoSelecao(
                   "Sem Dor",
@@ -280,6 +291,8 @@ class _TelaSintomasState extends State<TelaSintomas> {
                   },
                 ),
               ]),
+
+              // Seção coleta
               secao("Coleta", [
                 botaoSelecao(
                   "Absorvente",
@@ -287,11 +300,10 @@ class _TelaSintomasState extends State<TelaSintomas> {
                   selecionado: coletaSelecionada == "Absorvente",
                   aoClicar: () {
                     setState(() {
-                      if (coletaSelecionada == "Absorvente") {
-                        coletaSelecionada = null;
-                      } else {
-                        coletaSelecionada = "Absorvente";
-                      }
+                      coletaSelecionada =
+                          coletaSelecionada == "Absorvente"
+                              ? null
+                              : "Absorvente";
                     });
                   },
                 ),
@@ -301,11 +313,8 @@ class _TelaSintomasState extends State<TelaSintomas> {
                   selecionado: coletaSelecionada == "Protetor",
                   aoClicar: () {
                     setState(() {
-                      if (coletaSelecionada == "Protetor") {
-                        coletaSelecionada = null;
-                      } else {
-                        coletaSelecionada = "Protetor";
-                      }
+                      coletaSelecionada =
+                          coletaSelecionada == "Protetor" ? null : "Protetor";
                     });
                   },
                 ),
@@ -315,11 +324,8 @@ class _TelaSintomasState extends State<TelaSintomas> {
                   selecionado: coletaSelecionada == "Coletor",
                   aoClicar: () {
                     setState(() {
-                      if (coletaSelecionada == "Coletor") {
-                        coletaSelecionada = null;
-                      } else {
-                        coletaSelecionada = "Coletor";
-                      }
+                      coletaSelecionada =
+                          coletaSelecionada == "Coletor" ? null : "Coletor";
                     });
                   },
                 ),
@@ -329,15 +335,14 @@ class _TelaSintomasState extends State<TelaSintomas> {
                   selecionado: coletaSelecionada == "Calcinha",
                   aoClicar: () {
                     setState(() {
-                      if (coletaSelecionada == "Calcinha") {
-                        coletaSelecionada = null;
-                      } else {
-                        coletaSelecionada = "Calcinha";
-                      }
+                      coletaSelecionada =
+                          coletaSelecionada == "Calcinha" ? null : "Calcinha";
                     });
                   },
                 ),
               ]),
+
+              // Seção relação sexual
               secao("Relação Sexual", [
                 botaoSelecao(
                   "Protegido",
@@ -345,11 +350,10 @@ class _TelaSintomasState extends State<TelaSintomas> {
                   selecionado: relacaoSelecionada == "Protegido",
                   aoClicar: () {
                     setState(() {
-                      if (relacaoSelecionada == "Protegido") {
-                        relacaoSelecionada = null;
-                      } else {
-                        relacaoSelecionada = "Protegido";
-                      }
+                      relacaoSelecionada =
+                          relacaoSelecionada == "Protegido"
+                              ? null
+                              : "Protegido";
                     });
                   },
                 ),
@@ -359,11 +363,10 @@ class _TelaSintomasState extends State<TelaSintomas> {
                   selecionado: relacaoSelecionada == "Sem proteção",
                   aoClicar: () {
                     setState(() {
-                      if (relacaoSelecionada == "Sem proteção") {
-                        relacaoSelecionada = null;
-                      } else {
-                        relacaoSelecionada = "Sem proteção";
-                      }
+                      relacaoSelecionada =
+                          relacaoSelecionada == "Sem proteção"
+                              ? null
+                              : "Sem proteção";
                     });
                   },
                 ),
@@ -373,11 +376,10 @@ class _TelaSintomasState extends State<TelaSintomas> {
                   selecionado: relacaoSelecionada == "Feito a sós",
                   aoClicar: () {
                     setState(() {
-                      if (relacaoSelecionada == "Feito a sós") {
-                        relacaoSelecionada = null;
-                      } else {
-                        relacaoSelecionada = "Feito a sós";
-                      }
+                      relacaoSelecionada =
+                          relacaoSelecionada == "Feito a sós"
+                              ? null
+                              : "Feito a sós";
                     });
                   },
                 ),
@@ -387,16 +389,18 @@ class _TelaSintomasState extends State<TelaSintomas> {
                   selecionado: relacaoSelecionada == "Não houve",
                   aoClicar: () {
                     setState(() {
-                      if (relacaoSelecionada == "Não houve") {
-                        relacaoSelecionada = null;
-                      } else {
-                        relacaoSelecionada = "Não houve";
-                      }
+                      relacaoSelecionada =
+                          relacaoSelecionada == "Não houve"
+                              ? null
+                              : "Não houve";
                     });
                   },
                 ),
               ]),
+
               const SizedBox(height: 24),
+
+              // Botões para salvar ou remover os dados
               Center(
                 child: Column(
                   children: [
@@ -429,6 +433,8 @@ class _TelaSintomasState extends State<TelaSintomas> {
           ),
         ),
       ),
+
+      // Barra inferior para navegação rápida entre telas
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Colors.black,
         selectedItemColor: Colors.pink,

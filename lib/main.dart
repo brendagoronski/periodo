@@ -1,17 +1,22 @@
+// IMPORTAÇÕES DE PACOTES
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+
+// IMPORTAÇÕES DOS ARQUIVOS INTERNOS
 import 'symptom_page.dart';
 import 'profile_page.dart';
 
+// INICIALIZAÇÃO DO APP
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('pt_BR', null);
   runApp(const AppCalendario());
 }
 
+// WIDGET PRINCIPAL DO APP
 class AppCalendario extends StatelessWidget {
   const AppCalendario({super.key});
 
@@ -33,6 +38,7 @@ class AppCalendario extends StatelessWidget {
   }
 }
 
+// TELA PRINCIPAL COM O CALENDÁRIO
 class TelaCalendario extends StatefulWidget {
   const TelaCalendario({super.key});
 
@@ -41,15 +47,18 @@ class TelaCalendario extends StatefulWidget {
 }
 
 class _TelaCalendarioState extends State<TelaCalendario> {
+  // ESTADO E VARIÁVEIS PRINCIPAIS
   DateTime _diaEmFoco = DateTime.now();
   final Set<DateTime> _diasMenstruada = {};
   final Map<DateTime, Map<String, dynamic>> _sintomasPorDia = {};
+  final List<DateTime> _iniciosDeCiclo = [];
+
   int _duracaoCiclo = 28;
   int _duracaoMenstruacao = 5;
+
   List<DateTime> _diasPrevistos = [];
   List<DateTime> _diasFertilidade = [];
   DateTime? _diaOvulacao;
-  final List<DateTime> _iniciosDeCiclo = [];
 
   @override
   void initState() {
@@ -57,9 +66,11 @@ class _TelaCalendarioState extends State<TelaCalendario> {
     _carregarDados();
   }
 
+  // FUNÇÃO PARA NORMALIZAR DATAS (IGNORAR HORA)
   DateTime _normalizarData(DateTime dia) =>
       DateTime(dia.year, dia.month, dia.day);
 
+  // RETORNA O NOME DO MÊS EM PORTUGUÊS
   String _nomeDoMes(int mes) {
     const meses = [
       'Janeiro',
@@ -78,8 +89,10 @@ class _TelaCalendarioState extends State<TelaCalendario> {
     return meses[mes - 1];
   }
 
+  // CALCULA OS DIAS DE MENSTRUAÇÃO, OVULAÇÃO E FERTILIDADE
   void _calcularPrevisoes() {
     if (_diasMenstruada.isEmpty) return;
+
     final ultimaData = _diasMenstruada.reduce((a, b) => a.isAfter(b) ? a : b);
     _detectarIniciosDeCiclo();
 
@@ -99,6 +112,7 @@ class _TelaCalendarioState extends State<TelaCalendario> {
       _duracaoMenstruacao,
       (i) => _normalizarData(proximaMenstruacao.add(Duration(days: i))),
     );
+
     final ovulacao = proximaMenstruacao.subtract(const Duration(days: 14));
     final diasFertilidade = List.generate(
       7,
@@ -112,6 +126,7 @@ class _TelaCalendarioState extends State<TelaCalendario> {
     });
   }
 
+  // DETECTA O INÍCIO DE NOVOS CICLOS
   void _detectarIniciosDeCiclo() {
     final dias = _diasMenstruada.toList()..sort();
     _iniciosDeCiclo.clear();
@@ -123,6 +138,7 @@ class _TelaCalendarioState extends State<TelaCalendario> {
     }
   }
 
+  // SALVA OS DADOS NO DISPOSITIVO
   Future<void> _salvarDados() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('duracaoCiclo', _duracaoCiclo);
@@ -135,10 +151,12 @@ class _TelaCalendarioState extends State<TelaCalendario> {
     await prefs.setString('sintomasPorDia', jsonEncode(sintomasStr));
   }
 
+  // CARREGA DADOS SALVOS NA MEMÓRIA LOCAL
   Future<void> _carregarDados() async {
     final prefs = await SharedPreferences.getInstance();
     _duracaoCiclo = prefs.getInt('duracaoCiclo') ?? 28;
     _duracaoMenstruacao = prefs.getInt('duracaoMenstruacao') ?? 5;
+
     final diasSalvos = prefs.getStringList('diasMenstruada');
     final sintomasStr = prefs.getString('sintomasPorDia');
 
@@ -160,6 +178,7 @@ class _TelaCalendarioState extends State<TelaCalendario> {
     setState(() {});
   }
 
+  // MOSTRA A LEGENDA DOS DIAS
   void _mostrarInformacoes() {
     showDialog(
       context: context,
@@ -198,6 +217,7 @@ class _TelaCalendarioState extends State<TelaCalendario> {
     );
   }
 
+  // EXIBE UM ITEM DA LEGENDA
   Widget _legenda(String cor, String texto) {
     final cores = {
       "Rosa": Colors.pink,
@@ -221,6 +241,7 @@ class _TelaCalendarioState extends State<TelaCalendario> {
     );
   }
 
+  // ABRE CONFIGURAÇÃO DE DURAÇÃO DO CICLO
   void _alterarCiclo() {
     showDialog(
       context: context,
@@ -286,9 +307,12 @@ class _TelaCalendarioState extends State<TelaCalendario> {
         child: Column(
           children: [
             const SizedBox(height: 16),
+
+            // CABEÇALHO: Nome do mês e duração do ciclo + botão de info
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                // Nome do mês e ciclo atual
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Column(
@@ -309,12 +333,16 @@ class _TelaCalendarioState extends State<TelaCalendario> {
                     ],
                   ),
                 ),
+
+                // Botão para mostrar legenda e explicações
                 IconButton(
                   icon: const Icon(Icons.info_outline, color: Colors.pink),
                   onPressed: _mostrarInformacoes,
                 ),
               ],
             ),
+
+            // CALENDÁRIO
             TableCalendar(
               locale: 'pt_BR',
               firstDay: DateTime.utc(2020, 1, 1),
@@ -323,10 +351,14 @@ class _TelaCalendarioState extends State<TelaCalendario> {
               calendarFormat: CalendarFormat.month,
               availableCalendarFormats: const {CalendarFormat.month: 'Mês'},
               headerStyle: const HeaderStyle(formatButtonVisible: false),
+
+              // Ao selecionar um dia, abre a tela de sintomas desse dia
               onDaySelected: (diaSelecionado, diaFocado) async {
                 setState(() => _diaEmFoco = diaFocado);
+
                 final dataNormalizada = _normalizarData(diaSelecionado);
                 final sintomasSalvos = _sintomasPorDia[dataNormalizada];
+
                 final resultado = await Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -337,7 +369,9 @@ class _TelaCalendarioState extends State<TelaCalendario> {
                         ),
                   ),
                 );
+
                 if (!mounted) return;
+
                 if (resultado != null) {
                   if (resultado == 'remover') {
                     setState(() {
@@ -360,15 +394,19 @@ class _TelaCalendarioState extends State<TelaCalendario> {
                   _calcularPrevisoes();
                 }
               },
+
               calendarStyle: const CalendarStyle(
                 defaultTextStyle: TextStyle(color: Colors.white),
                 weekendTextStyle: TextStyle(color: Colors.white),
                 outsideDaysVisible: false,
               ),
+
+              // Customização visual dos dias (cores e marcações)
               calendarBuilders: CalendarBuilders(
                 defaultBuilder: (context, dia, _) {
                   final data = _normalizarData(dia);
                   Color? cor;
+
                   if (_diasMenstruada.contains(data)) {
                     cor = Colors.pink;
                   } else if (_diasPrevistos.contains(data)) {
@@ -397,6 +435,8 @@ class _TelaCalendarioState extends State<TelaCalendario> {
                 },
               ),
             ),
+
+            // Botão para alterar duração do ciclo e menstruação
             TextButton.icon(
               onPressed: _alterarCiclo,
               icon: const Icon(Icons.settings, color: Colors.pink),
@@ -408,17 +448,22 @@ class _TelaCalendarioState extends State<TelaCalendario> {
           ],
         ),
       ),
+
+      // BARRA DE NAVEGAÇÃO INFERIOR COM 3 BOTÕES
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Colors.black,
         selectedItemColor: Colors.pink,
         unselectedItemColor: Colors.white54,
+
         onTap: (index) {
           if (index == 0) {
+            // Tela inicial (calendário)
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(builder: (context) => const TelaCalendario()),
             );
           } else if (index == 1) {
+            // Tela de sintomas do dia atual
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -427,12 +472,14 @@ class _TelaCalendarioState extends State<TelaCalendario> {
               ),
             );
           } else if (index == 2) {
+            // Tela de perfil
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const TelaPerfil()),
             );
           }
         },
+
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Início'),
           BottomNavigationBarItem(icon: Icon(Icons.opacity), label: 'Hoje'),
