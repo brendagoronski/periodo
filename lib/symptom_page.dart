@@ -82,6 +82,7 @@ class _TelaSintomasState extends State<TelaSintomas> {
   }
 
   void _salvarDados() {
+    // Não deixa salvar vazio
     if (fluxoSelecionado == null &&
         sintomasSelecionados.isEmpty &&
         coletaSelecionada == null &&
@@ -95,6 +96,7 @@ class _TelaSintomasState extends State<TelaSintomas> {
       return;
     }
 
+    // Retorna os dados para o main
     Navigator.pop(context, {
       'fluxo': fluxoSelecionado,
       'sintomas': sintomasSelecionados.toList(),
@@ -145,44 +147,79 @@ class _TelaSintomasState extends State<TelaSintomas> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
+      appBar: AppBar(
+        title: Text(
+          "Monitorar Dia ${widget.diaSelecionado.day}/${widget.diaSelecionado.month}",
+          style: const TextStyle(color: Colors.white),
+        ),
+        backgroundColor: Colors.black,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.pink),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                "Monitorar Dia ${widget.diaSelecionado.day}/${widget.diaSelecionado.month}",
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
               secao("Fluxo Menstrual", [
                 botaoSelecao(
                   "Leve",
                   Icons.opacity,
                   selecionado: fluxoSelecionado == "Leve",
-                  aoClicar: () => setState(() => fluxoSelecionado = "Leve"),
+                  aoClicar: () {
+                    setState(() {
+                      if (fluxoSelecionado == "Leve") {
+                        fluxoSelecionado = null; // desclicar
+                      } else {
+                        fluxoSelecionado = "Leve";
+                      }
+                    });
+                  },
                 ),
                 botaoSelecao(
                   "Médio",
                   Icons.opacity,
                   selecionado: fluxoSelecionado == "Médio",
-                  aoClicar: () => setState(() => fluxoSelecionado = "Médio"),
+                  aoClicar: () {
+                    setState(() {
+                      if (fluxoSelecionado == "Médio") {
+                        fluxoSelecionado = null;
+                      } else {
+                        fluxoSelecionado = "Médio";
+                      }
+                    });
+                  },
                 ),
                 botaoSelecao(
                   "Intenso",
                   Icons.opacity,
                   selecionado: fluxoSelecionado == "Intenso",
-                  aoClicar: () => setState(() => fluxoSelecionado = "Intenso"),
+                  aoClicar: () {
+                    setState(() {
+                      if (fluxoSelecionado == "Intenso") {
+                        fluxoSelecionado = null;
+                      } else {
+                        fluxoSelecionado = "Intenso";
+                      }
+                    });
+                  },
                 ),
                 botaoSelecao(
                   "Muito",
                   Icons.opacity,
                   selecionado: fluxoSelecionado == "Muito",
-                  aoClicar: () => setState(() => fluxoSelecionado = "Muito"),
+                  aoClicar: () {
+                    setState(() {
+                      if (fluxoSelecionado == "Muito") {
+                        fluxoSelecionado = null;
+                      } else {
+                        fluxoSelecionado = "Muito";
+                      }
+                    });
+                  },
                 ),
               ]),
               secao("Dores/Sintomas", [
@@ -190,45 +227,57 @@ class _TelaSintomasState extends State<TelaSintomas> {
                   "Sem Dor",
                   Icons.sentiment_satisfied,
                   selecionado: sintomasSelecionados.contains("Sem Dor"),
-                  aoClicar:
-                      () => setState(() {
-                        sintomasSelecionados.contains("Sem Dor")
-                            ? sintomasSelecionados.remove("Sem Dor")
-                            : sintomasSelecionados.add("Sem Dor");
-                      }),
+                  aoClicar: () {
+                    setState(() {
+                      if (sintomasSelecionados.contains("Sem Dor")) {
+                        sintomasSelecionados.remove("Sem Dor");
+                      } else {
+                        sintomasSelecionados.add("Sem Dor");
+                      }
+                    });
+                  },
                 ),
                 botaoSelecao(
                   "Cólica",
                   Icons.mood_bad,
                   selecionado: sintomasSelecionados.contains("Cólica"),
-                  aoClicar:
-                      () => setState(() {
-                        sintomasSelecionados.contains("Cólica")
-                            ? sintomasSelecionados.remove("Cólica")
-                            : sintomasSelecionados.add("Cólica");
-                      }),
+                  aoClicar: () {
+                    setState(() {
+                      if (sintomasSelecionados.contains("Cólica")) {
+                        sintomasSelecionados.remove("Cólica");
+                      } else {
+                        sintomasSelecionados.add("Cólica");
+                      }
+                    });
+                  },
                 ),
                 botaoSelecao(
                   "Ovulação",
                   Icons.circle,
                   selecionado: sintomasSelecionados.contains("Ovulação"),
-                  aoClicar:
-                      () => setState(() {
-                        sintomasSelecionados.contains("Ovulação")
-                            ? sintomasSelecionados.remove("Ovulação")
-                            : sintomasSelecionados.add("Ovulação");
-                      }),
+                  aoClicar: () {
+                    setState(() {
+                      if (sintomasSelecionados.contains("Ovulação")) {
+                        sintomasSelecionados.remove("Ovulação");
+                      } else {
+                        sintomasSelecionados.add("Ovulação");
+                      }
+                    });
+                  },
                 ),
                 botaoSelecao(
                   "Lombar",
                   Icons.accessibility,
                   selecionado: sintomasSelecionados.contains("Lombar"),
-                  aoClicar:
-                      () => setState(() {
-                        sintomasSelecionados.contains("Lombar")
-                            ? sintomasSelecionados.remove("Lombar")
-                            : sintomasSelecionados.add("Lombar");
-                      }),
+                  aoClicar: () {
+                    setState(() {
+                      if (sintomasSelecionados.contains("Lombar")) {
+                        sintomasSelecionados.remove("Lombar");
+                      } else {
+                        sintomasSelecionados.add("Lombar");
+                      }
+                    });
+                  },
                 ),
               ]),
               secao("Coleta", [
@@ -236,28 +285,57 @@ class _TelaSintomasState extends State<TelaSintomas> {
                   "Absorvente",
                   Icons.sanitizer,
                   selecionado: coletaSelecionada == "Absorvente",
-                  aoClicar:
-                      () => setState(() => coletaSelecionada = "Absorvente"),
+                  aoClicar: () {
+                    setState(() {
+                      if (coletaSelecionada == "Absorvente") {
+                        coletaSelecionada = null;
+                      } else {
+                        coletaSelecionada = "Absorvente";
+                      }
+                    });
+                  },
                 ),
                 botaoSelecao(
                   "Protetor",
                   Icons.layers,
                   selecionado: coletaSelecionada == "Protetor",
-                  aoClicar:
-                      () => setState(() => coletaSelecionada = "Protetor"),
+                  aoClicar: () {
+                    setState(() {
+                      if (coletaSelecionada == "Protetor") {
+                        coletaSelecionada = null;
+                      } else {
+                        coletaSelecionada = "Protetor";
+                      }
+                    });
+                  },
                 ),
                 botaoSelecao(
                   "Coletor",
                   Icons.coffee,
                   selecionado: coletaSelecionada == "Coletor",
-                  aoClicar: () => setState(() => coletaSelecionada = "Coletor"),
+                  aoClicar: () {
+                    setState(() {
+                      if (coletaSelecionada == "Coletor") {
+                        coletaSelecionada = null;
+                      } else {
+                        coletaSelecionada = "Coletor";
+                      }
+                    });
+                  },
                 ),
                 botaoSelecao(
                   "Calcinha",
                   Icons.emoji_people,
                   selecionado: coletaSelecionada == "Calcinha",
-                  aoClicar:
-                      () => setState(() => coletaSelecionada = "Calcinha"),
+                  aoClicar: () {
+                    setState(() {
+                      if (coletaSelecionada == "Calcinha") {
+                        coletaSelecionada = null;
+                      } else {
+                        coletaSelecionada = "Calcinha";
+                      }
+                    });
+                  },
                 ),
               ]),
               secao("Relação Sexual", [
@@ -265,29 +343,57 @@ class _TelaSintomasState extends State<TelaSintomas> {
                   "Protegido",
                   Icons.favorite,
                   selecionado: relacaoSelecionada == "Protegido",
-                  aoClicar:
-                      () => setState(() => relacaoSelecionada = "Protegido"),
+                  aoClicar: () {
+                    setState(() {
+                      if (relacaoSelecionada == "Protegido") {
+                        relacaoSelecionada = null;
+                      } else {
+                        relacaoSelecionada = "Protegido";
+                      }
+                    });
+                  },
                 ),
                 botaoSelecao(
                   "Sem proteção",
                   Icons.warning,
                   selecionado: relacaoSelecionada == "Sem proteção",
-                  aoClicar:
-                      () => setState(() => relacaoSelecionada = "Sem proteção"),
+                  aoClicar: () {
+                    setState(() {
+                      if (relacaoSelecionada == "Sem proteção") {
+                        relacaoSelecionada = null;
+                      } else {
+                        relacaoSelecionada = "Sem proteção";
+                      }
+                    });
+                  },
                 ),
                 botaoSelecao(
                   "Feito a sós",
                   Icons.self_improvement,
                   selecionado: relacaoSelecionada == "Feito a sós",
-                  aoClicar:
-                      () => setState(() => relacaoSelecionada = "Feito a sós"),
+                  aoClicar: () {
+                    setState(() {
+                      if (relacaoSelecionada == "Feito a sós") {
+                        relacaoSelecionada = null;
+                      } else {
+                        relacaoSelecionada = "Feito a sós";
+                      }
+                    });
+                  },
                 ),
                 botaoSelecao(
                   "Não houve",
                   Icons.cancel,
                   selecionado: relacaoSelecionada == "Não houve",
-                  aoClicar:
-                      () => setState(() => relacaoSelecionada = "Não houve"),
+                  aoClicar: () {
+                    setState(() {
+                      if (relacaoSelecionada == "Não houve") {
+                        relacaoSelecionada = null;
+                      } else {
+                        relacaoSelecionada = "Não houve";
+                      }
+                    });
+                  },
                 ),
               ]),
               const SizedBox(height: 24),

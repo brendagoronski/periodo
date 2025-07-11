@@ -4,7 +4,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'symptom_page.dart';
-import 'profile_page.dart'; // NOVO IMPORT
+import 'profile_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -321,6 +321,8 @@ class _TelaCalendarioState extends State<TelaCalendario> {
               lastDay: DateTime.utc(2030, 12, 31),
               focusedDay: _diaEmFoco,
               calendarFormat: CalendarFormat.month,
+              availableCalendarFormats: const {CalendarFormat.month: 'Mês'},
+              headerStyle: const HeaderStyle(formatButtonVisible: false),
               onDaySelected: (diaSelecionado, diaFocado) async {
                 setState(() => _diaEmFoco = diaFocado);
                 final dataNormalizada = _normalizarData(diaSelecionado);
@@ -343,9 +345,15 @@ class _TelaCalendarioState extends State<TelaCalendario> {
                       _sintomasPorDia.remove(dataNormalizada);
                     });
                   } else {
+                    final dados = resultado as Map<String, dynamic>;
+                    final temFluxo = dados['fluxo'] != null;
                     setState(() {
-                      _diasMenstruada.add(dataNormalizada);
-                      _sintomasPorDia[dataNormalizada] = resultado;
+                      if (temFluxo) {
+                        _diasMenstruada.add(dataNormalizada);
+                      } else {
+                        _diasMenstruada.remove(dataNormalizada);
+                      }
+                      _sintomasPorDia[dataNormalizada] = dados;
                     });
                   }
                   _salvarDados();
@@ -361,14 +369,15 @@ class _TelaCalendarioState extends State<TelaCalendario> {
                 defaultBuilder: (context, dia, _) {
                   final data = _normalizarData(dia);
                   Color? cor;
-                  if (_diasMenstruada.contains(data))
+                  if (_diasMenstruada.contains(data)) {
                     cor = Colors.pink;
-                  else if (_diasPrevistos.contains(data))
+                  } else if (_diasPrevistos.contains(data)) {
                     cor = Colors.pink.shade100;
-                  else if (_diaOvulacao == data)
+                  } else if (_diaOvulacao == data) {
                     cor = Colors.purple;
-                  else if (_diasFertilidade.contains(data))
+                  } else if (_diasFertilidade.contains(data)) {
                     cor = Colors.green;
+                  }
 
                   return Container(
                     margin: const EdgeInsets.all(4),
