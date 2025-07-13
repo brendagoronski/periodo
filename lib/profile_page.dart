@@ -1,20 +1,22 @@
+// IMPORTAÇÕES DE PACOTES NECESSÁRIOS
 import 'package:flutter/material.dart';
 
-// Importando as páginas corretas com os nomes reais
+// Importações das páginas para navegação entre telas
 import 'anticoncepcional_page.dart';
 import 'historico_page.dart';
 import 'personalizacao_page.dart';
 import 'main.dart'; // TelaCalendario
 import 'symptom_page.dart'; // TelaSintomas
 
+// WIDGET PRINCIPAL - Tela de Perfil do Usuário
 class TelaPerfil extends StatelessWidget {
   const TelaPerfil({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
-
+      backgroundColor: Colors.black, // Fundo preto para o tema escuro
+      // BARRA SUPERIOR - AppBar com título centralizado
       appBar: AppBar(
         backgroundColor: Colors.black,
         title: const Text(
@@ -24,17 +26,21 @@ class TelaPerfil extends StatelessWidget {
         centerTitle: true,
       ),
 
+      // CORPO PRINCIPAL - Conteúdo do perfil dentro de SafeArea e Padding
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(20),
           child: Column(
             children: [
+              // Avatar do usuário com ícone
               const CircleAvatar(
                 radius: 40,
                 backgroundColor: Colors.pink,
                 child: Icon(Icons.person, size: 40, color: Colors.white),
               ),
               const SizedBox(height: 12),
+
+              // Nome do usuário
               const Text(
                 'Selton Mello Da Silva',
                 style: TextStyle(
@@ -43,13 +49,16 @@ class TelaPerfil extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                 ),
               ),
+
+              // Email do usuário
               const Text(
                 'SeltonMello.3@gmail.com',
                 style: TextStyle(color: Colors.grey, fontSize: 14),
               ),
+
               const SizedBox(height: 30),
 
-              // Botões de navegação com as classes corretas
+              // Botões para navegação para outras telas do app
               botaoPerfil(context, "Histórico De Saúde", Icons.history, () {
                 Navigator.push(
                   context,
@@ -59,6 +68,7 @@ class TelaPerfil extends StatelessWidget {
                 );
               }),
               const SizedBox(height: 12),
+
               botaoPerfil(context, "Anticoncepcional", Icons.medication, () {
                 Navigator.push(
                   context,
@@ -68,6 +78,7 @@ class TelaPerfil extends StatelessWidget {
                 );
               }),
               const SizedBox(height: 12),
+
               botaoPerfil(
                 context,
                 "Personalize Seu Monitoramento",
@@ -84,7 +95,7 @@ class TelaPerfil extends StatelessWidget {
 
               const Spacer(),
 
-              // Imagem ilustrativa
+              // Imagem ilustrativa no rodapé do conteúdo
               SizedBox(
                 height: 80,
                 child: Image.asset(
@@ -94,11 +105,14 @@ class TelaPerfil extends StatelessWidget {
               ),
               const SizedBox(height: 20),
 
+              // Texto explicativo sobre privacidade dos dados
               const Text(
                 'Suas informações estão 100% protegidas,\nnenhum dos dados informados no seu aplicativo será\nredirecionado para terceiros.',
                 textAlign: TextAlign.center,
                 style: TextStyle(color: Colors.white70, fontSize: 12),
               ),
+
+              // Botão para "Saiba mais" (ainda sem ação)
               TextButton(
                 onPressed: () {},
                 child: const Text(
@@ -111,7 +125,7 @@ class TelaPerfil extends StatelessWidget {
         ),
       ),
 
-      // Rodapé com navegação
+      // RODAPÉ - Barra de navegação inferior para alternar entre as principais telas
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Colors.black,
         selectedItemColor: Colors.pink,
@@ -132,7 +146,7 @@ class TelaPerfil extends StatelessWidget {
               ),
             );
           } else if (index == 2) {
-            // Já está na tela de perfil
+            // Já está na tela de perfil, não faz nada
           }
         },
         items: const [
@@ -144,7 +158,7 @@ class TelaPerfil extends StatelessWidget {
     );
   }
 
-  // Botão de ação reutilizável
+  // MÉTODO AUXILIAR - Botão estilizado reutilizável para o perfil
   Widget botaoPerfil(
     BuildContext context,
     String texto,

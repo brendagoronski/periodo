@@ -1,6 +1,8 @@
+// IMPORTAÇÕES DE PACOTES NECESSÁRIOS
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+// WIDGET PRINCIPAL - Tela para personalizar as preferências de monitoramento
 class TelaPersonalizacao extends StatefulWidget {
   const TelaPersonalizacao({super.key});
 
@@ -8,40 +10,65 @@ class TelaPersonalizacao extends StatefulWidget {
   State<TelaPersonalizacao> createState() => _TelaPersonalizacaoState();
 }
 
+// ESTADO DO WIDGET - Gerencia o estado dos switches e salva/carrega preferências
 class _TelaPersonalizacaoState extends State<TelaPersonalizacao> {
+  // Flags que indicam quais dados o usuário deseja monitorar
   bool monitorarFluxo = true;
   bool monitorarDores = true;
   bool monitorarColeta = true;
   bool monitorarRelacao = true;
+  bool monitorarAnticoncepcional = true;
 
+  // MÉTODO DE INICIALIZAÇÃO - Carrega as preferências salvas ao iniciar a tela
   @override
   void initState() {
     super.initState();
-    carregarPreferencias();
+    _carregarPreferencias();
   }
 
-  Future<void> carregarPreferencias() async {
+  // FUNÇÃO ASSÍNCRONA PARA CARREGAR PREFERÊNCIAS DO SHARED PREFERENCES
+  Future<void> _carregarPreferencias() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       monitorarFluxo = prefs.getBool('monitorarFluxo') ?? true;
       monitorarDores = prefs.getBool('monitorarDores') ?? true;
       monitorarColeta = prefs.getBool('monitorarColeta') ?? true;
       monitorarRelacao = prefs.getBool('monitorarRelacao') ?? true;
+      monitorarAnticoncepcional =
+          prefs.getBool('monitorarAnticoncepcional') ?? true;
     });
   }
 
-  Future<void> salvarPreferencias() async {
+  // FUNÇÃO ASSÍNCRONA PARA SALVAR PREFERÊNCIAS NO DISPOSITIVO
+  Future<void> _salvarPreferencias() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('monitorarFluxo', monitorarFluxo);
     await prefs.setBool('monitorarDores', monitorarDores);
     await prefs.setBool('monitorarColeta', monitorarColeta);
     await prefs.setBool('monitorarRelacao', monitorarRelacao);
+    await prefs.setBool('monitorarAnticoncepcional', monitorarAnticoncepcional);
   }
 
+  // MÉTODO AUXILIAR - Cria um SwitchListTile customizado com título e callback
+  Widget _construtorSwitch(
+    String titulo,
+    bool valor,
+    ValueChanged<bool> onChanged,
+  ) {
+    return SwitchListTile(
+      title: Text(titulo, style: const TextStyle(color: Colors.white)),
+      value: valor,
+      onChanged: onChanged,
+      activeColor: Colors.pink,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 0),
+    );
+  }
+
+  // CONSTRUÇÃO DA INTERFACE DA TELA
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.black, // Fundo preto para tema escuro
       appBar: AppBar(
         backgroundColor: Colors.black,
         title: const Text(
@@ -50,63 +77,66 @@ class _TelaPersonalizacaoState extends State<TelaPersonalizacao> {
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(20), // Espaçamento interno da tela
         child: Column(
           children: [
+            // Texto de instrução para o usuário
             const Text(
-              'Escolha os sintomas e informações que deseja monitorar durante o ciclo:',
+              'Escolha o que deseja monitorar no seu ciclo:',
               style: TextStyle(color: Colors.white70, fontSize: 16),
-              textAlign: TextAlign.center,
             ),
             const SizedBox(height: 20),
-            SwitchListTile(
-              title: const Text(
-                'Fluxo Menstrual',
-                style: TextStyle(color: Colors.white),
-              ),
-              value: monitorarFluxo,
-              onChanged: (val) => setState(() => monitorarFluxo = val),
-              activeColor: Colors.pink,
+
+            // Switches para cada tipo de monitoramento, usando o construtor customizado
+            _construtorSwitch(
+              'Fluxo Menstrual',
+              monitorarFluxo,
+              (v) => setState(() => monitorarFluxo = v),
             ),
-            SwitchListTile(
-              title: const Text(
-                'Dores / Sintomas',
-                style: TextStyle(color: Colors.white),
-              ),
-              value: monitorarDores,
-              onChanged: (val) => setState(() => monitorarDores = val),
-              activeColor: Colors.pink,
+            _construtorSwitch(
+              'Dores/Sintomas',
+              monitorarDores,
+              (v) => setState(() => monitorarDores = v),
             ),
-            SwitchListTile(
-              title: const Text(
-                'Método de Coleta',
-                style: TextStyle(color: Colors.white),
-              ),
-              value: monitorarColeta,
-              onChanged: (val) => setState(() => monitorarColeta = val),
-              activeColor: Colors.pink,
+            _construtorSwitch(
+              'Coleta Menstrual',
+              monitorarColeta,
+              (v) => setState(() => monitorarColeta = v),
             ),
-            SwitchListTile(
-              title: const Text(
-                'Relação Sexual',
-                style: TextStyle(color: Colors.white),
-              ),
-              value: monitorarRelacao,
-              onChanged: (val) => setState(() => monitorarRelacao = val),
-              activeColor: Colors.pink,
+            _construtorSwitch(
+              'Relação Sexual',
+              monitorarRelacao,
+              (v) => setState(() => monitorarRelacao = v),
             ),
-            const SizedBox(height: 30),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.pink),
-              onPressed: () async {
-                await salvarPreferencias();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Preferências salvas com sucesso'),
+            _construtorSwitch(
+              'Anticoncepcional',
+              monitorarAnticoncepcional,
+              (v) => setState(() => monitorarAnticoncepcional = v),
+            ),
+
+            const Spacer(), // Espaço flexível para empurrar o botão para baixo
+            // Botão para salvar as preferências selecionadas
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.pink),
+                onPressed: () async {
+                  await _salvarPreferencias();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Preferências salvas com sucesso!'),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                },
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 14),
+                  child: Text(
+                    'Salvar Preferências',
+                    style: TextStyle(fontSize: 16),
                   ),
-                );
-              },
-              child: const Text('Salvar Preferências'),
+                ),
+              ),
             ),
           ],
         ),

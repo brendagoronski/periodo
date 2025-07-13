@@ -1,9 +1,12 @@
+// IMPORTAÇÕES DE PACOTES
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'main.dart';
 import 'profile_page.dart';
 
+// WIDGET PRINCIPAL - Tela para monitoramento dos sintomas diários
 class TelaSintomas extends StatefulWidget {
+  // Data do dia monitorado e dados iniciais (se existir)
   final DateTime diaSelecionado;
   final Map<String, dynamic>? dadosIniciais;
 
@@ -17,24 +20,34 @@ class TelaSintomas extends StatefulWidget {
   State<TelaSintomas> createState() => _TelaSintomasState();
 }
 
+// ESTADO DA TELA - Gerencia dados, preferências e interação do usuário
 class _TelaSintomasState extends State<TelaSintomas> {
-  // Monitoramentos ativados
+  // FLAGS PARA MONITORAMENTO - indica se cada seção está ativa para o usuário
   bool monitorarFluxo = true;
   bool monitorarDores = true;
   bool monitorarColeta = true;
   bool monitorarRelacao = true;
+  bool monitorarAnticoncepcional = true; // flag adicionada
 
-  // Estado dos dados selecionados
+  // VARIÁVEIS PARA DADOS SELECIONADOS PELO USUÁRIO
   String? fluxoSelecionado;
   Set<String> sintomasSelecionados = {};
   String? coletaSelecionada;
   String? relacaoSelecionada;
 
+  // DADOS DO ANTICONCEPCIONAL - tipo e uso, para perguntas específicas
+  String? tipoAnticoncepcional;
+  bool usoContinuo = true;
+  String? respostaAnticoncepcional;
+
+  // MÉTODO DE INICIALIZAÇÃO - carrega preferências, dados anticoncepcional e dados iniciais
   @override
   void initState() {
     super.initState();
     carregarPreferencias();
+    carregarConfiguracaoAnticoncepcional();
 
+    // Se estiver editando um registro com dados existentes, popula os campos
     if (widget.dadosIniciais != null) {
       fluxoSelecionado = widget.dadosIniciais!['fluxo'];
       coletaSelecionada = widget.dadosIniciais!['coleta'];
@@ -44,9 +57,13 @@ class _TelaSintomasState extends State<TelaSintomas> {
       if (sintomas is List) {
         sintomasSelecionados = sintomas.map((e) => e.toString()).toSet();
       }
+
+      respostaAnticoncepcional =
+          widget.dadosIniciais!['respostaAnticoncepcional'];
     }
   }
 
+  // FUNÇÃO PARA CARREGAR PREFERÊNCIAS DE MONITORAMENTO DO DISPOSITIVO
   Future<void> carregarPreferencias() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -54,14 +71,28 @@ class _TelaSintomasState extends State<TelaSintomas> {
       monitorarDores = prefs.getBool('monitorarDores') ?? true;
       monitorarColeta = prefs.getBool('monitorarColeta') ?? true;
       monitorarRelacao = prefs.getBool('monitorarRelacao') ?? true;
+      monitorarAnticoncepcional =
+          prefs.getBool('monitorarAnticoncepcional') ?? true; // adicionada
     });
   }
 
+  // FUNÇÃO PARA CARREGAR CONFIGURAÇÃO DE ANTICONCEPCIONAL SALVA NO DISPOSITIVO
+  Future<void> carregarConfiguracaoAnticoncepcional() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      tipoAnticoncepcional = prefs.getString('anticoncepcional_tipo');
+      usoContinuo = prefs.getBool('anticoncepcional_usoContinuo') ?? true;
+    });
+  }
+
+  // MÉTODO PARA SALVAR OS DADOS INSERIDOS PELO USUÁRIO
   void _salvarDados() {
+    // Validação para garantir que pelo menos um dado foi selecionado
     if (fluxoSelecionado == null &&
         sintomasSelecionados.isEmpty &&
         coletaSelecionada == null &&
-        relacaoSelecionada == null) {
+        relacaoSelecionada == null &&
+        respostaAnticoncepcional == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Selecione pelo menos um dado antes de salvar.'),
@@ -71,14 +102,17 @@ class _TelaSintomasState extends State<TelaSintomas> {
       return;
     }
 
+    // Envia os dados para a tela anterior ao fechar esta
     Navigator.pop(context, {
       'fluxo': fluxoSelecionado,
       'sintomas': sintomasSelecionados.toList(),
       'coleta': coletaSelecionada,
       'relacao': relacaoSelecionada,
+      'respostaAnticoncepcional': respostaAnticoncepcional,
     });
   }
 
+  // DIÁLOGO DE CONFIRMAÇÃO PARA REMOÇÃO DO REGISTRO DO DIA
   Future<void> _confirmarRemocao() async {
     final confirmado = await showDialog<bool>(
       context: context,
@@ -117,6 +151,7 @@ class _TelaSintomasState extends State<TelaSintomas> {
     }
   }
 
+  // WIDGET PERSONALIZADO PARA BOTÕES DE SELEÇÃO (Ícone + texto)
   Widget botaoSelecao(
     String texto,
     IconData icone, {
@@ -143,6 +178,7 @@ class _TelaSintomasState extends State<TelaSintomas> {
     );
   }
 
+  // WIDGET PARA CRIAR SEÇÕES COM TÍTULO E BOTÕES (exemplo: fluxo, sintomas)
   Widget secao(String titulo, List<Widget> botoes) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -162,11 +198,132 @@ class _TelaSintomasState extends State<TelaSintomas> {
     );
   }
 
+  // BLOCO DE PERGUNTAS ESPECÍFICAS PARA O TIPO DE ANTICONCEPCIONAL SELECIONADO
+  Widget blocoAnticoncepcional() {
+    if (tipoAnticoncepcional == null) return Container();
+
+    switch (tipoAnticoncepcional) {
+      case 'Pílula':
+        return secao("Anticoncepcional - Pílula", [
+          botaoSelecao(
+            "Tomei hoje",
+            Icons.check_circle,
+            selecionado: respostaAnticoncepcional == "Tomei",
+            aoClicar: () => setState(() => respostaAnticoncepcional = "Tomei"),
+          ),
+          botaoSelecao(
+            "Esqueci",
+            Icons.warning,
+            selecionado: respostaAnticoncepcional == "Esqueci",
+            aoClicar:
+                () => setState(() => respostaAnticoncepcional = "Esqueci"),
+          ),
+          botaoSelecao(
+            "Estou na pausa",
+            Icons.pause_circle,
+            selecionado: respostaAnticoncepcional == "Pausa",
+            aoClicar: () => setState(() => respostaAnticoncepcional = "Pausa"),
+          ),
+        ]);
+
+      case 'Adesivo':
+        return secao("Anticoncepcional - Adesivo", [
+          botaoSelecao(
+            "Troquei adesivo",
+            Icons.check_circle,
+            selecionado: respostaAnticoncepcional == "Trocou",
+            aoClicar: () => setState(() => respostaAnticoncepcional = "Trocou"),
+          ),
+          botaoSelecao(
+            "Não troquei",
+            Icons.warning,
+            selecionado: respostaAnticoncepcional == "Não trocou",
+            aoClicar:
+                () => setState(() => respostaAnticoncepcional = "Não trocou"),
+          ),
+        ]);
+
+      case 'Injeção':
+        return secao("Anticoncepcional - Injeção", [
+          botaoSelecao(
+            "Tomei injeção",
+            Icons.check_circle,
+            selecionado: respostaAnticoncepcional == "Tomei",
+            aoClicar: () => setState(() => respostaAnticoncepcional = "Tomei"),
+          ),
+          botaoSelecao(
+            "Não tomei",
+            Icons.warning,
+            selecionado: respostaAnticoncepcional == "Não tomei",
+            aoClicar:
+                () => setState(() => respostaAnticoncepcional = "Não tomei"),
+          ),
+        ]);
+
+      case 'DIU':
+        return secao("Anticoncepcional - DIU", [
+          botaoSelecao(
+            "Em uso",
+            Icons.check_circle,
+            selecionado: respostaAnticoncepcional == "Em uso",
+            aoClicar: () => setState(() => respostaAnticoncepcional = "Em uso"),
+          ),
+          botaoSelecao(
+            "Não em uso",
+            Icons.warning,
+            selecionado: respostaAnticoncepcional == "Não em uso",
+            aoClicar:
+                () => setState(() => respostaAnticoncepcional = "Não em uso"),
+          ),
+        ]);
+
+      case 'Anel vaginal':
+        return secao("Anticoncepcional - Anel vaginal", [
+          botaoSelecao(
+            "Coloquei anel",
+            Icons.check_circle,
+            selecionado: respostaAnticoncepcional == "Coloquei",
+            aoClicar:
+                () => setState(() => respostaAnticoncepcional = "Coloquei"),
+          ),
+          botaoSelecao(
+            "Não coloquei",
+            Icons.warning,
+            selecionado: respostaAnticoncepcional == "Não coloquei",
+            aoClicar:
+                () => setState(() => respostaAnticoncepcional = "Não coloquei"),
+          ),
+        ]);
+
+      case 'Implante':
+        return secao("Anticoncepcional - Implante", [
+          botaoSelecao(
+            "Em uso",
+            Icons.check_circle,
+            selecionado: respostaAnticoncepcional == "Em uso",
+            aoClicar: () => setState(() => respostaAnticoncepcional = "Em uso"),
+          ),
+          botaoSelecao(
+            "Não em uso",
+            Icons.warning,
+            selecionado: respostaAnticoncepcional == "Não em uso",
+            aoClicar:
+                () => setState(() => respostaAnticoncepcional = "Não em uso"),
+          ),
+        ]);
+
+      default:
+        return Container();
+    }
+  }
+
+  // CONSTRUÇÃO DA INTERFACE DA TELA
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
 
+      // BARRA SUPERIOR COM TÍTULO E BOTÃO VOLTAR
       appBar: AppBar(
         title: Text(
           "Monitorar Dia ${widget.diaSelecionado.day}/${widget.diaSelecionado.month}",
@@ -179,6 +336,7 @@ class _TelaSintomasState extends State<TelaSintomas> {
         ),
       ),
 
+      // CORPO DA TELA - SCROLLABLE PARA SEÇÕES DE DADOS
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
@@ -391,6 +549,9 @@ class _TelaSintomasState extends State<TelaSintomas> {
                   ),
                 ]),
 
+              // Exibe bloco anticoncepcional só se preferencia estiver ativa
+              if (monitorarAnticoncepcional) blocoAnticoncepcional(),
+
               const SizedBox(height: 24),
 
               Center(
@@ -403,59 +564,30 @@ class _TelaSintomasState extends State<TelaSintomas> {
                           horizontal: 40,
                           vertical: 12,
                         ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(24),
+                        ),
                       ),
                       onPressed: _salvarDados,
                       child: const Text(
-                        "Salvar",
-                        style: TextStyle(color: Colors.white, fontSize: 16),
+                        'Salvar',
+                        style: TextStyle(fontSize: 18),
                       ),
                     ),
-                    const SizedBox(height: 12),
-                    TextButton(
-                      onPressed: _confirmarRemocao,
-                      child: const Text(
-                        "Remover este dia",
-                        style: TextStyle(color: Colors.white70),
+                    if (widget.dadosIniciais != null)
+                      TextButton(
+                        onPressed: _confirmarRemocao,
+                        child: const Text(
+                          'Remover Registro',
+                          style: TextStyle(color: Colors.pink),
+                        ),
                       ),
-                    ),
                   ],
                 ),
               ),
             ],
           ),
         ),
-      ),
-
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Colors.black,
-        selectedItemColor: Colors.pink,
-        unselectedItemColor: Colors.white54,
-        onTap: (index) {
-          if (index == 0) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const TelaCalendario()),
-            );
-          } else if (index == 1) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder:
-                    (context) => TelaSintomas(diaSelecionado: DateTime.now()),
-              ),
-            );
-          } else if (index == 2) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const TelaPerfil()),
-            );
-          }
-        },
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Início'),
-          BottomNavigationBarItem(icon: Icon(Icons.opacity), label: 'Hoje'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Perfil'),
-        ],
       ),
     );
   }
