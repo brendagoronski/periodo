@@ -1,6 +1,8 @@
 // IMPORTAÇÕES DE PACOTES NECESSÁRIOS
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dao/historico_dao.dart';
+import 'model/historico_model.dart';
 
 // WIDGET PRINCIPAL - Tela para selecionar e salvar configurações do anticoncepcional
 class TelaAnticoncepcional extends StatefulWidget {
@@ -50,6 +52,14 @@ class _TelaAnticoncepcionalState extends State<TelaAnticoncepcional> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('anticoncepcional_tipo', tipoSelecionado!);
     await prefs.setBool('anticoncepcional_usoContinuo', usoContinuo);
+
+    // Salvar no banco de dados local
+    final historico = Historico(
+      data: DateTime.now().toIso8601String().substring(0, 10),
+      tipo: 'Anticoncepcional',
+      descricao: 'Tipo: $tipoSelecionado | Uso contínuo: ${usoContinuo ? "Sim" : "Não"}',
+    );
+    await HistoricoDao().inserir(historico);
   }
 
   // CONSTRUÇÃO DA INTERFACE DA TELA

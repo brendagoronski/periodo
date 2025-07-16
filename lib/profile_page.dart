@@ -97,7 +97,7 @@ class TelaPerfil extends StatelessWidget {
 
               // Imagem ilustrativa no rodapé do conteúdo
               SizedBox(
-                height: 80,
+                height: 120,
                 child: Image.asset(
                   'assets/mestruacao.png',
                   fit: BoxFit.contain,

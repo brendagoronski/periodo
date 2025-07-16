@@ -1,8 +1,8 @@
 // IMPORTAÇÕES DE PACOTES
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'main.dart';
-import 'profile_page.dart';
+import 'dao/historico_dao.dart';
+import 'model/historico_model.dart';
 
 // WIDGET PRINCIPAL - Tela para monitoramento dos sintomas diários
 class TelaSintomas extends StatefulWidget {
@@ -102,6 +102,22 @@ class _TelaSintomasState extends State<TelaSintomas> {
       return;
     }
 
+    // Monta descrição amigável
+    final descricao = [
+      if (fluxoSelecionado != null) 'Fluxo: $fluxoSelecionado',
+      if (sintomasSelecionados.isNotEmpty) 'Sintomas: ${sintomasSelecionados.join(", ")}',
+      if (coletaSelecionada != null) 'Coleta: $coletaSelecionada',
+      if (relacaoSelecionada != null) 'Relação: $relacaoSelecionada',
+      if (respostaAnticoncepcional != null) 'Anticoncepcional: $respostaAnticoncepcional',
+    ].join(' | ');
+
+    final historico = Historico(
+      data: widget.diaSelecionado.toIso8601String().substring(0, 10),
+      tipo: 'Registro Diário',
+      descricao: descricao,
+    );
+    HistoricoDao().inserir(historico);
+
     // Envia os dados para a tela anterior ao fechar esta
     Navigator.pop(context, {
       'fluxo': fluxoSelecionado,
@@ -147,6 +163,13 @@ class _TelaSintomasState extends State<TelaSintomas> {
     );
 
     if (confirmado == true) {
+      // Salva no histórico a remoção
+      final historico = Historico(
+        data: widget.diaSelecionado.toIso8601String().substring(0, 10),
+        tipo: 'Remoção',
+        descricao: 'Registro do dia removido',
+      );
+      HistoricoDao().inserir(historico);
       Navigator.pop(context, 'remover');
     }
   }
