@@ -87,7 +87,6 @@ class _TelaSintomasState extends State<TelaSintomas> {
 
   // MÉTODO PARA SALVAR OS DADOS INSERIDOS PELO USUÁRIO
   void _salvarDados() {
-    // Validação para garantir que pelo menos um dado foi selecionado
     if (fluxoSelecionado == null &&
         sintomasSelecionados.isEmpty &&
         coletaSelecionada == null &&
@@ -102,23 +101,21 @@ class _TelaSintomasState extends State<TelaSintomas> {
       return;
     }
 
-    // Monta descrição amigável
-    final descricao = [
-      if (fluxoSelecionado != null) 'Fluxo: $fluxoSelecionado',
-      if (sintomasSelecionados.isNotEmpty) 'Sintomas: ${sintomasSelecionados.join(", ")}',
-      if (coletaSelecionada != null) 'Coleta: $coletaSelecionada',
-      if (relacaoSelecionada != null) 'Relação: $relacaoSelecionada',
-      if (respostaAnticoncepcional != null) 'Anticoncepcional: $respostaAnticoncepcional',
-    ].join(' | ');
-
     final historico = Historico(
       data: widget.diaSelecionado.toIso8601String().substring(0, 10),
       tipo: 'Registro Diário',
-      descricao: descricao,
+      fluxo: fluxoSelecionado,
+      sintomas:
+          sintomasSelecionados.isNotEmpty
+              ? sintomasSelecionados.join(', ')
+              : null,
+      coleta: coletaSelecionada,
+      relacao: relacaoSelecionada,
+      anticoncepcional: respostaAnticoncepcional,
     );
+
     HistoricoDao().inserir(historico);
 
-    // Envia os dados para a tela anterior ao fechar esta
     Navigator.pop(context, {
       'fluxo': fluxoSelecionado,
       'sintomas': sintomasSelecionados.toList(),
@@ -167,7 +164,11 @@ class _TelaSintomasState extends State<TelaSintomas> {
       final historico = Historico(
         data: widget.diaSelecionado.toIso8601String().substring(0, 10),
         tipo: 'Remoção',
-        descricao: 'Registro do dia removido',
+        fluxo: null,
+        sintomas: null,
+        coleta: null,
+        relacao: null,
+        anticoncepcional: null,
       );
       HistoricoDao().inserir(historico);
       Navigator.pop(context, 'remover');
@@ -575,41 +576,39 @@ class _TelaSintomasState extends State<TelaSintomas> {
               // Exibe bloco anticoncepcional só se preferencia estiver ativa
               if (monitorarAnticoncepcional) blocoAnticoncepcional(),
 
-              const SizedBox(height: 24),
-
-              Center(
-                child: Column(
-                  children: [
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.pink,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 40,
-                          vertical: 12,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(24),
-                        ),
-                      ),
-                      onPressed: _salvarDados,
-                      child: const Text(
-                        'Salvar',
-                        style: TextStyle(fontSize: 18),
-                      ),
-                    ),
-                    if (widget.dadosIniciais != null)
-                      TextButton(
-                        onPressed: _confirmarRemocao,
-                        child: const Text(
-                          'Remover Registro',
-                          style: TextStyle(color: Colors.pink),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
+              const SizedBox(height: 80),
             ],
           ),
+        ),
+      ),
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.pink,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 40,
+                  vertical: 12,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24),
+                ),
+              ),
+              onPressed: _salvarDados,
+              child: const Text('Salvar', style: TextStyle(fontSize: 18)),
+            ),
+            if (widget.dadosIniciais != null)
+              TextButton(
+                onPressed: _confirmarRemocao,
+                child: const Text(
+                  'Remover Registro',
+                  style: TextStyle(color: Colors.pink),
+                ),
+              ),
+          ],
         ),
       ),
     );

@@ -1,10 +1,8 @@
-// IMPORTAÇÕES DE PACOTES NECESSÁRIOS
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dao/historico_dao.dart';
 import 'model/historico_model.dart';
 
-// WIDGET PRINCIPAL - Tela para personalizar as preferências de monitoramento
 class TelaPersonalizacao extends StatefulWidget {
   const TelaPersonalizacao({super.key});
 
@@ -12,23 +10,19 @@ class TelaPersonalizacao extends StatefulWidget {
   State<TelaPersonalizacao> createState() => _TelaPersonalizacaoState();
 }
 
-// ESTADO DO WIDGET - Gerencia o estado dos switches e salva/carrega preferências
 class _TelaPersonalizacaoState extends State<TelaPersonalizacao> {
-  // Flags que indicam quais dados o usuário deseja monitorar
   bool monitorarFluxo = true;
   bool monitorarDores = true;
   bool monitorarColeta = true;
   bool monitorarRelacao = true;
   bool monitorarAnticoncepcional = true;
 
-  // MÉTODO DE INICIALIZAÇÃO - Carrega as preferências salvas ao iniciar a tela
   @override
   void initState() {
     super.initState();
     _carregarPreferencias();
   }
 
-  // FUNÇÃO ASSÍNCRONA PARA CARREGAR PREFERÊNCIAS DO SHARED PREFERENCES
   Future<void> _carregarPreferencias() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -41,7 +35,6 @@ class _TelaPersonalizacaoState extends State<TelaPersonalizacao> {
     });
   }
 
-  // FUNÇÃO ASSÍNCRONA PARA SALVAR PREFERÊNCIAS NO DISPOSITIVO
   Future<void> _salvarPreferencias() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('monitorarFluxo', monitorarFluxo);
@@ -50,22 +43,19 @@ class _TelaPersonalizacaoState extends State<TelaPersonalizacao> {
     await prefs.setBool('monitorarRelacao', monitorarRelacao);
     await prefs.setBool('monitorarAnticoncepcional', monitorarAnticoncepcional);
 
-    // Salvar no banco de dados local
     final historico = Historico(
       data: DateTime.now().toIso8601String().substring(0, 10),
       tipo: 'Personalização',
-      descricao: [
-        'Fluxo: ${monitorarFluxo ? "Sim" : "Não"}',
-        'Dores: ${monitorarDores ? "Sim" : "Não"}',
-        'Coleta: ${monitorarColeta ? "Sim" : "Não"}',
-        'Relação: ${monitorarRelacao ? "Sim" : "Não"}',
-        'Anticoncepcional: ${monitorarAnticoncepcional ? "Sim" : "Não"}',
-      ].join(' | '),
+      fluxo: monitorarFluxo ? 'Sim' : 'Não',
+      sintomas: monitorarDores ? 'Sim' : 'Não',
+      coleta: monitorarColeta ? 'Sim' : 'Não',
+      relacao: monitorarRelacao ? 'Sim' : 'Não',
+      anticoncepcional: monitorarAnticoncepcional ? 'Sim' : 'Não',
     );
+
     await HistoricoDao().inserir(historico);
   }
 
-  // MÉTODO AUXILIAR - Cria um SwitchListTile customizado com título e callback
   Widget _construtorSwitch(
     String titulo,
     bool valor,
@@ -80,11 +70,10 @@ class _TelaPersonalizacaoState extends State<TelaPersonalizacao> {
     );
   }
 
-  // CONSTRUÇÃO DA INTERFACE DA TELA
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black, // Fundo preto para tema escuro
+      backgroundColor: Colors.black,
       appBar: AppBar(
         backgroundColor: Colors.black,
         title: const Text(
@@ -93,17 +82,14 @@ class _TelaPersonalizacaoState extends State<TelaPersonalizacao> {
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(20), // Espaçamento interno da tela
+        padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            // Texto de instrução para o usuário
             const Text(
               'Escolha o que deseja monitorar no seu ciclo:',
               style: TextStyle(color: Colors.white70, fontSize: 16),
             ),
             const SizedBox(height: 20),
-
-            // Switches para cada tipo de monitoramento, usando o construtor customizado
             _construtorSwitch(
               'Fluxo Menstrual',
               monitorarFluxo,
@@ -129,9 +115,7 @@ class _TelaPersonalizacaoState extends State<TelaPersonalizacao> {
               monitorarAnticoncepcional,
               (v) => setState(() => monitorarAnticoncepcional = v),
             ),
-
-            const Spacer(), // Espaço flexível para empurrar o botão para baixo
-            // Botão para salvar as preferências selecionadas
+            const Spacer(),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(

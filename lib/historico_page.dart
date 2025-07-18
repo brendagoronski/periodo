@@ -1,9 +1,7 @@
-// IMPORTAÇÕES DE PACOTES NECESSÁRIOS
 import 'package:flutter/material.dart';
 import 'dao/historico_dao.dart';
 import 'model/historico_model.dart';
 
-// WIDGET PRINCIPAL - Tela que exibirá o histórico dos registros de saúde
 class TelaHistorico extends StatefulWidget {
   const TelaHistorico({super.key});
 
@@ -26,10 +24,36 @@ class _TelaHistoricoState extends State<TelaHistorico> {
     });
   }
 
+  // Método auxiliar para construir a descrição do histórico com base nos campos disponíveis
+  String _construirDescricao(Historico h) {
+    final List<String> detalhes = [];
+
+    if (h.anticoncepcional != null) {
+      detalhes.add('Anticoncepcional: ${h.anticoncepcional}');
+    }
+    if (h.fluxo != null) {
+      detalhes.add('Fluxo: ${h.fluxo}');
+    }
+    if (h.sintomas != null) {
+      detalhes.add('Sintomas: ${h.sintomas}');
+    }
+    if (h.coleta != null) {
+      detalhes.add('Coleta: ${h.coleta}');
+    }
+    if (h.relacao != null) {
+      detalhes.add('Relação: ${h.relacao}');
+    }
+
+    // Se nada foi preenchido, retorna um aviso
+    return detalhes.isNotEmpty
+        ? detalhes.join('\n')
+        : 'Sem detalhes adicionais.';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black, // Fundo preto para manter o tema escuro
+      backgroundColor: Colors.black,
       appBar: AppBar(
         backgroundColor: Colors.black,
         title: const Text(
@@ -43,7 +67,12 @@ class _TelaHistoricoState extends State<TelaHistorico> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
-            return Center(child: Text('Erro ao carregar histórico', style: TextStyle(color: Colors.red)));
+            return Center(
+              child: Text(
+                'Erro ao carregar histórico',
+                style: TextStyle(color: Colors.red),
+              ),
+            );
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(
               child: Text(
@@ -60,11 +89,29 @@ class _TelaHistoricoState extends State<TelaHistorico> {
                 final h = historicos[index];
                 return Card(
                   color: Colors.grey[900],
-                  margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                  margin: const EdgeInsets.symmetric(
+                    vertical: 8,
+                    horizontal: 16,
+                  ),
                   child: ListTile(
-                    title: Text(h.tipo, style: const TextStyle(color: Colors.pink, fontWeight: FontWeight.bold)),
-                    subtitle: Text(h.descricao, style: const TextStyle(color: Colors.white70)),
-                    trailing: Text(h.data, style: const TextStyle(color: Colors.white38, fontSize: 12)),
+                    title: Text(
+                      h.tipo,
+                      style: const TextStyle(
+                        color: Colors.pink,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    subtitle: Text(
+                      _construirDescricao(h),
+                      style: const TextStyle(color: Colors.white70),
+                    ),
+                    trailing: Text(
+                      h.data,
+                      style: const TextStyle(
+                        color: Colors.white38,
+                        fontSize: 12,
+                      ),
+                    ),
                   ),
                 );
               },

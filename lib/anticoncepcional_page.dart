@@ -1,10 +1,8 @@
-// IMPORTAÇÕES DE PACOTES NECESSÁRIOS
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dao/historico_dao.dart';
 import 'model/historico_model.dart';
 
-// WIDGET PRINCIPAL - Tela para selecionar e salvar configurações do anticoncepcional
 class TelaAnticoncepcional extends StatefulWidget {
   const TelaAnticoncepcional({super.key});
 
@@ -12,9 +10,7 @@ class TelaAnticoncepcional extends StatefulWidget {
   State<TelaAnticoncepcional> createState() => _TelaAnticoncepcionalState();
 }
 
-// ESTADO DO WIDGET - Gerencia seleção e persistência dos dados do anticoncepcional
 class _TelaAnticoncepcionalState extends State<TelaAnticoncepcional> {
-  // Lista de tipos de anticoncepcionais disponíveis para seleção
   final List<String> tiposAnticoncepcionais = [
     'Pílula',
     'Injeção',
@@ -24,20 +20,15 @@ class _TelaAnticoncepcionalState extends State<TelaAnticoncepcional> {
     'Implante',
   ];
 
-  // Variável que armazena o tipo selecionado pelo usuário
   String? tipoSelecionado;
-
-  // Flag que indica se o uso do anticoncepcional é contínuo (true) ou em pausa (false)
   bool usoContinuo = true;
 
-  // MÉTODO DE INICIALIZAÇÃO - Carrega a configuração salva ao iniciar a tela
   @override
   void initState() {
     super.initState();
     _carregarConfiguracao();
   }
 
-  // FUNÇÃO ASSÍNCRONA QUE CARREGA OS DADOS SALVOS NO DISPOSITIVO
   Future<void> _carregarConfiguracao() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -46,27 +37,29 @@ class _TelaAnticoncepcionalState extends State<TelaAnticoncepcional> {
     });
   }
 
-  // FUNÇÃO ASSÍNCRONA QUE SALVA AS CONFIGURAÇÕES SELECIONADAS NO DISPOSITIVO
   Future<void> _salvarConfiguracao() async {
-    if (tipoSelecionado == null) return; // Se não selecionou nada, não salva
+    if (tipoSelecionado == null) return;
+
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('anticoncepcional_tipo', tipoSelecionado!);
     await prefs.setBool('anticoncepcional_usoContinuo', usoContinuo);
 
-    // Salvar no banco de dados local
+    final respostaAnticoncepcional =
+        'Tipo: $tipoSelecionado | Uso contínuo: ${usoContinuo ? "Sim" : "Não"}';
+
     final historico = Historico(
       data: DateTime.now().toIso8601String().substring(0, 10),
       tipo: 'Anticoncepcional',
-      descricao: 'Tipo: $tipoSelecionado | Uso contínuo: ${usoContinuo ? "Sim" : "Não"}',
+      anticoncepcional: respostaAnticoncepcional,
     );
+
     await HistoricoDao().inserir(historico);
   }
 
-  // CONSTRUÇÃO DA INTERFACE DA TELA
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black, // Fundo preto para o tema escuro
+      backgroundColor: Colors.black,
       appBar: AppBar(
         backgroundColor: Colors.black,
         title: const Text(
@@ -75,18 +68,15 @@ class _TelaAnticoncepcionalState extends State<TelaAnticoncepcional> {
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(20), // Espaçamento interno das bordas
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Texto explicativo
             const Text(
               'Selecione o tipo de anticoncepcional que você usa:',
               style: TextStyle(color: Colors.white70, fontSize: 16),
             ),
             const SizedBox(height: 10),
-
-            // Lista de opções representadas por RadioListTile para selecionar o tipo
             ...tiposAnticoncepcionais.map((tipo) {
               return RadioListTile<String>(
                 activeColor: Colors.pink,
@@ -96,10 +86,7 @@ class _TelaAnticoncepcionalState extends State<TelaAnticoncepcional> {
                 onChanged: (valor) => setState(() => tipoSelecionado = valor),
               );
             }).toList(),
-
             const SizedBox(height: 20),
-
-            // Linha contendo o texto e o switch para indicar uso contínuo ou não
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -114,16 +101,12 @@ class _TelaAnticoncepcionalState extends State<TelaAnticoncepcional> {
                 ),
               ],
             ),
-
             const Spacer(),
-
-            // Botão para salvar as configurações selecionadas
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(backgroundColor: Colors.pink),
                 onPressed: () async {
-                  // Validação para garantir que o usuário selecionou um tipo
                   if (tipoSelecionado == null) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
@@ -135,8 +118,9 @@ class _TelaAnticoncepcionalState extends State<TelaAnticoncepcional> {
                     );
                     return;
                   }
-                  // Salva as configurações e exibe confirmação
+
                   await _salvarConfiguracao();
+
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(

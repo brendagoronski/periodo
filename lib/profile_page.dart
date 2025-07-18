@@ -32,33 +32,7 @@ class TelaPerfil extends StatelessWidget {
           padding: const EdgeInsets.all(20),
           child: Column(
             children: [
-              // Avatar do usuário com ícone
-              const CircleAvatar(
-                radius: 40,
-                backgroundColor: Colors.pink,
-                child: Icon(Icons.person, size: 40, color: Colors.white),
-              ),
-              const SizedBox(height: 12),
-
-              // Nome do usuário
-              const Text(
-                'Selton Mello Da Silva',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-
-              // Email do usuário
-              const Text(
-                'SeltonMello.3@gmail.com',
-                style: TextStyle(color: Colors.grey, fontSize: 14),
-              ),
-
-              const SizedBox(height: 30),
-
-              // Botões para navegação para outras telas do app
+              // Botões para navegação
               botaoPerfil(context, "Histórico De Saúde", Icons.history, () {
                 Navigator.push(
                   context,
@@ -95,7 +69,7 @@ class TelaPerfil extends StatelessWidget {
 
               const Spacer(),
 
-              // Imagem ilustrativa no rodapé do conteúdo
+              // Imagem ilustrativa
               SizedBox(
                 height: 120,
                 child: Image.asset(
@@ -105,14 +79,16 @@ class TelaPerfil extends StatelessWidget {
               ),
               const SizedBox(height: 20),
 
-              // Texto explicativo sobre privacidade dos dados
+              // Texto de privacidade
               const Text(
-                'Suas informações estão 100% protegidas,\nnenhum dos dados informados no seu aplicativo será\nredirecionado para terceiros.',
+                'Suas informações estão 100% protegidas,\n'
+                'nenhum dos dados informados no seu aplicativo será\n'
+                'redirecionado para terceiros.',
                 textAlign: TextAlign.center,
                 style: TextStyle(color: Colors.white70, fontSize: 12),
               ),
 
-              // Botão para "Saiba mais" (ainda sem ação)
+              // Botão "Saiba mais"
               TextButton(
                 onPressed: () {},
                 child: const Text(
@@ -125,12 +101,12 @@ class TelaPerfil extends StatelessWidget {
         ),
       ),
 
-      // RODAPÉ - Barra de navegação inferior para alternar entre as principais telas
+      // RODAPÉ - Barra de navegação inferior
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Colors.black,
         selectedItemColor: Colors.pink,
         unselectedItemColor: Colors.white54,
-        currentIndex: 2, // Perfil é a aba ativa
+        currentIndex: 2, // Perfil ativo
         onTap: (index) {
           if (index == 0) {
             Navigator.pushReplacement(
@@ -145,9 +121,8 @@ class TelaPerfil extends StatelessWidget {
                     (context) => TelaSintomas(diaSelecionado: DateTime.now()),
               ),
             );
-          } else if (index == 2) {
-            // Já está na tela de perfil, não faz nada
           }
+          // index 2 = já está na tela de perfil
         },
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Início'),
@@ -158,7 +133,7 @@ class TelaPerfil extends StatelessWidget {
     );
   }
 
-  // MÉTODO AUXILIAR - Botão estilizado reutilizável para o perfil
+  // MÉTODO AUXILIAR - Botão estilizado
   Widget botaoPerfil(
     BuildContext context,
     String texto,
