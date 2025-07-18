@@ -1,4 +1,3 @@
-// IMPORTAÇÕES DE PACOTES NECESSÁRIOS
 import 'package:flutter/material.dart';
 
 // Importações das páginas para navegação entre telas
@@ -21,18 +20,27 @@ class TelaPerfil extends StatelessWidget {
         backgroundColor: Colors.black,
         title: const Text(
           'Perfil de Saúde',
-          style: TextStyle(color: Colors.pink),
+          style: TextStyle(
+            color: Colors.pink,
+            fontWeight: FontWeight.bold, // Título em negrito
+            fontSize: 24,
+          ),
         ),
         centerTitle: true,
+        elevation: 0, // Remove a sombra da AppBar para deixar mais limpo
       ),
 
       // CORPO PRINCIPAL - Conteúdo do perfil dentro de SafeArea e Padding
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.symmetric(
+            horizontal: 20,
+            vertical: 20,
+          ), // Ajuste no padding
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Botões para navegação
+              // Botões para navegação, sem o Spacer para empurrar para baixo
               botaoPerfil(context, "Histórico De Saúde", Icons.history, () {
                 Navigator.push(
                   context,
@@ -41,7 +49,7 @@ class TelaPerfil extends StatelessWidget {
                   ),
                 );
               }),
-              const SizedBox(height: 12),
+              const SizedBox(height: 20),
 
               botaoPerfil(context, "Anticoncepcional", Icons.medication, () {
                 Navigator.push(
@@ -51,7 +59,7 @@ class TelaPerfil extends StatelessWidget {
                   ),
                 );
               }),
-              const SizedBox(height: 12),
+              const SizedBox(height: 20),
 
               botaoPerfil(
                 context,
@@ -67,14 +75,20 @@ class TelaPerfil extends StatelessWidget {
                 },
               ),
 
-              const Spacer(),
-
-              // Imagem ilustrativa
-              SizedBox(
-                height: 120,
-                child: Image.asset(
-                  'assets/mestruacao.png',
-                  fit: BoxFit.contain,
+              const Spacer(), // Mantém o espaçamento da parte inferior
+              // Imagem ilustrativa com borda suave
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.pink, width: 2),
+                ),
+                child: SizedBox(
+                  height: 120,
+                  child: Image.asset(
+                    'assets/mestruacao.png',
+                    fit: BoxFit.contain,
+                  ),
                 ),
               ),
               const SizedBox(height: 20),
@@ -85,15 +99,24 @@ class TelaPerfil extends StatelessWidget {
                 'nenhum dos dados informados no seu aplicativo será\n'
                 'redirecionado para terceiros.',
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.white70, fontSize: 12),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
+              const SizedBox(height: 16),
 
               // Botão "Saiba mais"
               TextButton(
                 onPressed: () {},
                 child: const Text(
                   "Saiba mais",
-                  style: TextStyle(color: Colors.pink, fontSize: 12),
+                  style: TextStyle(
+                    color: Colors.pink,
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],
@@ -142,13 +165,13 @@ class TelaPerfil extends StatelessWidget {
   ) {
     return SizedBox(
       width: double.infinity,
-      height: 48,
+      height: 55, // Ajustei para um pouco maior para conforto
       child: ElevatedButton.icon(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.pink,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(12), // Bordas mais arredondadas
           ),
         ),
         icon: Icon(icone, color: Colors.white),
@@ -156,7 +179,8 @@ class TelaPerfil extends StatelessWidget {
           texto,
           style: const TextStyle(
             color: Colors.white,
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.bold, // Deixando o texto mais forte
+            fontSize: 16,
           ),
         ),
       ),

@@ -20,7 +20,9 @@ class _TelaAnticoncepcionalState extends State<TelaAnticoncepcional> {
     'Implante',
   ];
 
-  String? tipoSelecionado;
+  // Map para controlar o estado dos switches, inicialmente todos desmarcados.
+  Map<String, bool> tiposSelecionados = {};
+
   bool usoContinuo = true;
 
   @override
@@ -31,26 +33,39 @@ class _TelaAnticoncepcionalState extends State<TelaAnticoncepcional> {
 
   Future<void> _carregarConfiguracao() async {
     final prefs = await SharedPreferences.getInstance();
+
     setState(() {
-      tipoSelecionado = prefs.getString('anticoncepcional_tipo');
+      // Carregar o estado de cada tipo
+      tiposSelecionados = Map.fromIterable(
+        tiposAnticoncepcionais,
+        key: (e) => e,
+        value: (e) => prefs.getBool('anticoncepcional_${e}_status') ?? false,
+      );
       usoContinuo = prefs.getBool('anticoncepcional_usoContinuo') ?? true;
     });
   }
 
   Future<void> _salvarConfiguracao() async {
-    if (tipoSelecionado == null) return;
-
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('anticoncepcional_tipo', tipoSelecionado!);
+
+    // Salvar o estado de cada tipo de anticoncepcional
+    tiposSelecionados.forEach((tipo, isSelected) {
+      prefs.setBool('anticoncepcional_${tipo}_status', isSelected);
+    });
+
+    // Salvar o estado do uso contínuo
     await prefs.setBool('anticoncepcional_usoContinuo', usoContinuo);
 
-    final respostaAnticoncepcional =
-        'Tipo: $tipoSelecionado | Uso contínuo: ${usoContinuo ? "Sim" : "Não"}';
+    final respostaAnticoncepcional = tiposSelecionados.entries
+        .where((entry) => entry.value)
+        .map((entry) => entry.key)
+        .join(', ');
 
     final historico = Historico(
       data: DateTime.now().toIso8601String().substring(0, 10),
       tipo: 'Anticoncepcional',
-      anticoncepcional: respostaAnticoncepcional,
+      anticoncepcional:
+          'Tipo: $respostaAnticoncepcional | Uso contínuo: ${usoContinuo ? "Sim" : "Não"}',
     );
 
     await HistoricoDao().inserir(historico);
@@ -73,19 +88,50 @@ class _TelaAnticoncepcionalState extends State<TelaAnticoncepcional> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'Selecione o tipo de anticoncepcional que você usa:',
+              'Selecione o anticoncepcional que você usa (ou nenhum):',
               style: TextStyle(color: Colors.white70, fontSize: 16),
             ),
             const SizedBox(height: 10),
+
+            // Adicionando a opção "Nenhum"
+            SwitchListTile(
+              activeColor: Colors.pink,
+              title: const Text(
+                'Nenhum',
+                style: TextStyle(color: Colors.white),
+              ),
+              value: tiposSelecionados.values.every((selected) => !selected),
+              onChanged: (valor) {
+                setState(() {
+                  // Se "Nenhum" for selecionado, desmarcamos todos os outros
+                  if (valor) {
+                    tiposSelecionados.updateAll((key, value) => false);
+                  }
+                });
+              },
+            ),
+
+            // Usar SwitchListTile para comportamento on/off, mas garantir apenas um tipo selecionado
             ...tiposAnticoncepcionais.map((tipo) {
-              return RadioListTile<String>(
+              return SwitchListTile(
                 activeColor: Colors.pink,
                 title: Text(tipo, style: const TextStyle(color: Colors.white)),
-                value: tipo,
-                groupValue: tipoSelecionado,
-                onChanged: (valor) => setState(() => tipoSelecionado = valor),
+                value: tiposSelecionados[tipo] ?? false,
+                onChanged: (valor) {
+                  setState(() {
+                    // Quando um tipo for selecionado, desmarcamos todos os outros (exceto "Nenhum")
+                    if (valor) {
+                      tiposSelecionados.updateAll(
+                        (key, value) => key == tipo ? true : false,
+                      );
+                    } else {
+                      tiposSelecionados[tipo] = false;
+                    }
+                  });
+                },
               );
             }).toList(),
+
             const SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -95,8 +141,8 @@ class _TelaAnticoncepcionalState extends State<TelaAnticoncepcional> {
                   style: TextStyle(color: Colors.white70, fontSize: 16),
                 ),
                 Switch(
-                  activeColor: Colors.pink,
                   value: usoContinuo,
+                  activeColor: Colors.pink,
                   onChanged: (valor) => setState(() => usoContinuo = valor),
                 ),
               ],
@@ -107,11 +153,14 @@ class _TelaAnticoncepcionalState extends State<TelaAnticoncepcional> {
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(backgroundColor: Colors.pink),
                 onPressed: () async {
-                  if (tipoSelecionado == null) {
+                  // Verifica se ao menos um tipo foi selecionado, ou "Nenhum" foi marcado
+                  if (tiposSelecionados.values.every(
+                    (isSelected) => !isSelected,
+                  )) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text(
-                          'Por favor, selecione um tipo de anticoncepcional.',
+                          'Por favor, selecione um tipo de anticoncepcional ou a opção "Nenhum".',
                         ),
                         backgroundColor: Colors.red,
                       ),
@@ -124,7 +173,7 @@ class _TelaAnticoncepcionalState extends State<TelaAnticoncepcional> {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(
-                        'Salvo: $tipoSelecionado - ${usoContinuo ? "Uso contínuo" : "Em pausa"}',
+                        'Salvo: ${tiposSelecionados.entries.where((entry) => entry.value).map((entry) => entry.key).join(', ')} - ${usoContinuo ? "Uso contínuo" : "Em pausa"}',
                       ),
                       backgroundColor: Colors.green,
                     ),
