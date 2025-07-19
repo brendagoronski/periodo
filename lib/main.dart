@@ -455,24 +455,54 @@ class _TelaCalendarioState extends State<TelaCalendario> {
         selectedItemColor: Colors.pink,
         unselectedItemColor: Colors.white54,
 
-        onTap: (index) {
+        onTap: (index) async {
           if (index == 0) {
-            // Tela inicial (calendário)
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(builder: (context) => const TelaCalendario()),
             );
           } else if (index == 1) {
-            // Tela de sintomas do dia atual
-            Navigator.push(
+            final hoje = DateTime.now();
+            final diaNormalizado = DateTime(hoje.year, hoje.month, hoje.day);
+            final sintomasSalvos = _sintomasPorDia[diaNormalizado];
+
+            final resultado = await Navigator.push(
               context,
               MaterialPageRoute(
                 builder:
-                    (context) => TelaSintomas(diaSelecionado: DateTime.now()),
+                    (context) => TelaSintomas(
+                      diaSelecionado: hoje,
+                      dadosIniciais: sintomasSalvos,
+                    ),
               ),
             );
+
+            if (!context.mounted) return;
+
+            if (resultado != null) {
+              if (resultado == 'remover') {
+                setState(() {
+                  _diasMenstruada.remove(diaNormalizado);
+                  _sintomasPorDia.remove(diaNormalizado);
+                });
+              } else {
+                final dados = resultado as Map<String, dynamic>;
+                final temFluxo = dados['fluxo'] != null;
+
+                setState(() {
+                  if (temFluxo) {
+                    _diasMenstruada.add(diaNormalizado);
+                  } else {
+                    _diasMenstruada.remove(diaNormalizado);
+                  }
+                  _sintomasPorDia[diaNormalizado] = dados;
+                });
+              }
+
+              _salvarDados();
+              _calcularPrevisoes();
+            }
           } else if (index == 2) {
-            // Tela de perfil
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const TelaPerfil()),
