@@ -1,5 +1,8 @@
 // IMPORTAÇÕES DE PACOTES
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -11,6 +14,11 @@ import 'profile_page.dart';
 
 // INICIALIZAÇÃO DO APP
 void main() async {
+  if (Platform.isWindows || Platform.isLinux) {
+    sqfliteFfiInit();
+    databaseFactory = databaseFactoryFfi;
+  }
+
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('pt_BR', null);
   runApp(const AppCalendario());
@@ -423,6 +431,41 @@ class _TelaCalendarioState extends State<TelaCalendario> {
                     decoration: BoxDecoration(
                       color: cor,
                       borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      '${dia.day}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  );
+                },
+                todayBuilder: (context, dia, _) {
+                  final data = _normalizarData(dia);
+                  final hoje = DateTime.now();
+                  Color? cor;
+
+                  if (_diasMenstruada.contains(data)) {
+                    cor = Colors.pink;
+                  } else if (_diasPrevistos.contains(data)) {
+                    cor = Colors.pink.shade100;
+                  } else if (_diaOvulacao == data) {
+                    cor = Colors.purple;
+                  } else if (_diasFertilidade.contains(data)) {
+                    cor = Colors.green;
+                  } else if (isSameDay(hoje, data)) {
+                    cor = Colors.deepPurpleAccent.shade100;
+                  }
+
+                  return Container(
+                    margin: const EdgeInsets.all(4),
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: cor,
+                      borderRadius: BorderRadius.circular(
+                        isSameDay(hoje, data) ? 50 : 10,
+                      ),
                     ),
                     child: Text(
                       '${dia.day}',

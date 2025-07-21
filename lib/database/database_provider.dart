@@ -20,7 +20,7 @@ class DatabaseProvider {
   // Inicializa o banco de dados e cria a tabela se não existir
   Future<Database> _initDB() async {
     final dbPath = await getDatabasesPath();
-    final path = join(dbPath, 'historico.db');
+    final path = join(dbPath, 'mestruacao.db');
 
     return await openDatabase(
       path,
@@ -35,8 +35,8 @@ class DatabaseProvider {
             sintomas TEXT,
             coleta TEXT,
             relacao TEXT,
-            anticoncepcional TEXT
-          )
+            respostaAnticoncepcional TEXT
+          );
         ''');
       },
     );
