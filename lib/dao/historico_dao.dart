@@ -36,4 +36,10 @@ class HistoricoDao {
     final db = await DatabaseProvider().database;
     return await db.delete(tableName, where: 'id = ?', whereArgs: [id]);
   }
+
+  // Deletar todos os registros da tabela
+  Future<int> deletarTodos() async {
+    final db = await DatabaseProvider().database;
+    return await db.delete(tableName); // Deleta todos os registros
+  }
 }

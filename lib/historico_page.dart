@@ -50,6 +50,43 @@ class _TelaHistoricoState extends State<TelaHistorico> {
         : 'Sem detalhes adicionais.';
   }
 
+  // Função para apagar todos os históricos
+  Future<void> _apagarHistorico() async {
+    final confirmacao = await showDialog<bool>(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Confirmar'),
+            content: const Text(
+              'Tem certeza que deseja apagar todo o histórico?',
+            ),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Cancelar'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text('Confirmar'),
+              ),
+            ],
+          ),
+    );
+
+    if (confirmacao == true) {
+      // Apagar todos os registros de histórico
+      await HistoricoDao().deletarTodos();
+      // Atualizar a tela após a remoção
+      _carregarHistoricos();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Histórico apagado com sucesso.'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -60,6 +97,13 @@ class _TelaHistoricoState extends State<TelaHistorico> {
           'Histórico de Saúde',
           style: TextStyle(color: Colors.pink),
         ),
+        actions: [
+          // Botão para apagar o histórico
+          IconButton(
+            icon: const Icon(Icons.delete),
+            onPressed: _apagarHistorico, // Ação para apagar o histórico
+          ),
+        ],
       ),
       body: FutureBuilder<List<Historico>>(
         future: _historicosFuture,

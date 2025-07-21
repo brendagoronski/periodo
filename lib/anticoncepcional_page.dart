@@ -164,22 +164,6 @@ class _TelaAnticoncepcionalState extends State<TelaAnticoncepcional> {
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(backgroundColor: Colors.pink),
               onPressed: () async {
-                // Verifica se ao menos um tipo foi selecionado, ou "Nenhum" foi marcado
-                if (tiposSelecionados.values.every(
-                      (isSelected) => !isSelected,
-                    ) &&
-                    !tiposSelecionados.values.any((isSelected) => isSelected)) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        'Por favor, selecione um tipo de anticoncepcional ou a opção "Nenhum".',
-                      ),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                  return;
-                }
-
                 await _salvarConfiguracao();
 
                 ScaffoldMessenger.of(context).showSnackBar(

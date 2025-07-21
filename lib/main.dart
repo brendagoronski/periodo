@@ -99,7 +99,14 @@ class _TelaCalendarioState extends State<TelaCalendario> {
 
   // CALCULA OS DIAS DE MENSTRUAÇÃO, OVULAÇÃO E FERTILIDADE
   void _calcularPrevisoes() {
-    if (_diasMenstruada.isEmpty) return;
+    if (_diasMenstruada.isEmpty) {
+      setState(() {
+        _diasPrevistos.clear();
+        _diasFertilidade.clear();
+        _diaOvulacao = null;
+      });
+      return;
+    }
 
     final ultimaData = _diasMenstruada.reduce((a, b) => a.isAfter(b) ? a : b);
     _detectarIniciosDeCiclo();

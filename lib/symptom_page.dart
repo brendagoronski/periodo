@@ -187,13 +187,13 @@ class _TelaSintomasState extends State<TelaSintomas> {
       child: Column(
         children: [
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: selecionado ? Colors.pink : Colors.grey[850],
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: Colors.pinkAccent.withOpacity(0.3)),
             ),
-            child: Icon(icone, color: Colors.white, size: 28),
+            child: Icon(icone, color: Colors.white, size: 48),
           ),
           const SizedBox(height: 4),
           Text(texto, style: const TextStyle(color: Colors.white70)),
@@ -582,7 +582,7 @@ class _TelaSintomasState extends State<TelaSintomas> {
         ),
       ),
       bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 72.0),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
