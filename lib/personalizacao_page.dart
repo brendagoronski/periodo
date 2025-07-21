@@ -82,7 +82,7 @@ class _TelaPersonalizacaoState extends State<TelaPersonalizacao> {
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 60),
         child: Column(
           children: [
             const Text(
