@@ -77,8 +77,9 @@ class _TelaAnticoncepcionalState extends State<TelaAnticoncepcional> {
           style: TextStyle(color: Colors.pink),
         ),
       ),
-      body: Column(
-        children: [
+       body: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 60),
+        child: Column(
           // Conteúdo da tela (rolável)
           Expanded(
             child: SingleChildScrollView(
