@@ -40,7 +40,7 @@ class TelaPerfil extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Botões para navegação, sem o Spacer para empurrar para baixo
+              // Botões para navegação
               botaoPerfil(context, "Histórico De Saúde", Icons.history, () {
                 Navigator.push(
                   context,
@@ -49,7 +49,9 @@ class TelaPerfil extends StatelessWidget {
                   ),
                 );
               }),
-              const SizedBox(height: 20),
+              const SizedBox(
+                height: 20,
+              ), // Aumentei o espaçamento entre os botões
 
               botaoPerfil(context, "Anticoncepcional", Icons.medication, () {
                 Navigator.push(
@@ -59,7 +61,9 @@ class TelaPerfil extends StatelessWidget {
                   ),
                 );
               }),
-              const SizedBox(height: 20),
+              const SizedBox(
+                height: 20,
+              ), // Aumentei o espaçamento entre os botões
 
               botaoPerfil(
                 context,
@@ -75,8 +79,10 @@ class TelaPerfil extends StatelessWidget {
                 },
               ),
 
-              const Spacer(), // Mantém o espaçamento da parte inferior
-              // Imagem ilustrativa com borda suave
+              const SizedBox(
+                height: 60,
+              ), // Reduzi o espaçamento antes da imagem
+              // Imagem ilustrativa com borda suave e largura igual aos botões
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
@@ -84,15 +90,20 @@ class TelaPerfil extends StatelessWidget {
                   border: Border.all(color: Colors.pink, width: 2),
                 ),
                 child: SizedBox(
-                  height: 120,
+                  width: double.infinity, // Largura igual aos botões
+                  height: 160, // Tamanho da imagem
                   child: Image.asset(
                     'assets/mestruacao.png',
                     fit: BoxFit.contain,
                   ),
                 ),
               ),
-              const SizedBox(height: 20),
 
+              const SizedBox(
+                height: 10,
+              ), // Reduzi o espaçamento entre a imagem e o texto
+
+              const Spacer(), // Empurra o conteúdo abaixo para o final
               // Texto de privacidade
               const Text(
                 'Suas informações estão 100% protegidas,\n'
@@ -105,20 +116,9 @@ class TelaPerfil extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 16),
-
-              // Botão "Saiba mais"
-              TextButton(
-                onPressed: () {},
-                child: const Text(
-                  "Saiba mais",
-                  style: TextStyle(
-                    color: Colors.pink,
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
+              const SizedBox(
+                height: 16,
+              ), // Ajuste de espaçamento antes da barra de navegação
             ],
           ),
         ),

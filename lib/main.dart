@@ -422,6 +422,8 @@ class _TelaCalendarioState extends State<TelaCalendario> {
                   final data = _normalizarData(dia);
                   Color? cor;
 
+                  debugPrint(_sintomasPorDia.toString());
+
                   if (_diasMenstruada.contains(data)) {
                     cor = Colors.pink;
                   } else if (_diasPrevistos.contains(data)) {
@@ -432,20 +434,63 @@ class _TelaCalendarioState extends State<TelaCalendario> {
                     cor = Colors.green;
                   }
 
-                  return Container(
-                    margin: const EdgeInsets.all(4),
+                  return Stack(
                     alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: cor,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Text(
-                      '${dia.day}',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
+                    children: [
+                      Container(
+                        margin: const EdgeInsets.all(4),
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: cor,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          '${dia.day}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
-                    ),
+                      if (_sintomasPorDia[data]?["relacao"] != null)
+                        Container(
+                          child: Positioned(
+                            top: 0,
+                            right: 0,
+                            child: Container(
+                              padding: EdgeInsets.all(2),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(8),
+                                color: Colors.black,
+                              ),
+                              child:
+                                  {
+                                    "Protegido": Icon(
+                                      Icons.favorite,
+                                      size: 16,
+                                      color: Colors.red,
+                                    ),
+                                    "Sem proteção": Icon(
+                                      Icons.child_friendly,
+                                      size: 16,
+                                      color: Colors.yellow,
+                                    ),
+                                    "Feito a sós": Icon(
+                                      Icons.disc_full,
+                                      size: 16,
+                                      color: Colors.pink,
+                                    ),
+                                    "Não houve": Icon(
+                                      Icons.thumb_down,
+                                      size: 16,
+                                      color: Colors.blue,
+                                    ),
+                                  }[_sintomasPorDia[data]?["relacao"]] ??
+                                  const SizedBox.shrink(),
+                            ),
+                          ),
+                        ),
+                    ],
                   );
                 },
                 todayBuilder: (context, dia, _) {
@@ -465,22 +510,65 @@ class _TelaCalendarioState extends State<TelaCalendario> {
                     cor = Colors.deepPurpleAccent.shade100;
                   }
 
-                  return Container(
-                    margin: const EdgeInsets.all(4),
+                  return Stack(
                     alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: cor,
-                      borderRadius: BorderRadius.circular(
-                        isSameDay(hoje, data) ? 50 : 10,
+                    children: [
+                      Container(
+                        margin: const EdgeInsets.all(4),
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: cor,
+                          borderRadius: BorderRadius.circular(
+                            isSameDay(hoje, data) ? 50 : 10,
+                          ),
+                        ),
+                        child: Text(
+                          '${dia.day}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
-                    ),
-                    child: Text(
-                      '${dia.day}',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                      if (_sintomasPorDia[data]?["relacao"] != null)
+                        Container(
+                          child: Positioned(
+                            top: 0,
+                            right: 0,
+                            child: Container(
+                              padding: EdgeInsets.all(2),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(8),
+                                color: Colors.black,
+                              ),
+                              child:
+                                  {
+                                    "Protegido": Icon(
+                                      Icons.favorite,
+                                      size: 16,
+                                      color: Colors.red,
+                                    ),
+                                    "Sem proteção": Icon(
+                                      Icons.child_friendly,
+                                      size: 16,
+                                      color: Colors.yellow,
+                                    ),
+                                    "Feito a sós": Icon(
+                                      Icons.disc_full,
+                                      size: 16,
+                                      color: Colors.pink,
+                                    ),
+                                    "Não houve": Icon(
+                                      Icons.thumb_down,
+                                      size: 16,
+                                      color: Colors.blue,
+                                    ),
+                                  }[_sintomasPorDia[data]?["relacao"]] ??
+                                  const SizedBox.shrink(),
+                            ),
+                          ),
+                        ),
+                    ],
                   );
                 },
               ),
@@ -548,7 +636,6 @@ class _TelaCalendarioState extends State<TelaCalendario> {
                   _sintomasPorDia[diaNormalizado] = dados;
                 });
               }
-
               _salvarDados();
               _calcularPrevisoes();
             }
