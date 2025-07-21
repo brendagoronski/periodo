@@ -12,6 +12,7 @@ class TelaAnticoncepcional extends StatefulWidget {
 
 class _TelaAnticoncepcionalState extends State<TelaAnticoncepcional> {
   final List<String> tiposAnticoncepcionais = [
+    'Nenhum',
     'Pílula',
     'Injeção',
     'DIU',
@@ -20,7 +21,7 @@ class _TelaAnticoncepcionalState extends State<TelaAnticoncepcional> {
     'Implante',
   ];
 
-  Map<String, bool> tiposSelecionados = {};
+  String? tipoSelecionado;
   bool usoContinuo = true;
 
   @override
@@ -31,36 +32,29 @@ class _TelaAnticoncepcionalState extends State<TelaAnticoncepcional> {
 
   Future<void> _carregarConfiguracao() async {
     final prefs = await SharedPreferences.getInstance();
-
     setState(() {
-      tiposSelecionados = Map.fromIterable(
-        tiposAnticoncepcionais,
-        key: (e) => e,
-        value: (e) => prefs.getBool('anticoncepcional_${e}_status') ?? false,
-      );
+      tipoSelecionado = prefs.getString('anticoncepcional_tipo');
       usoContinuo = prefs.getBool('anticoncepcional_usoContinuo') ?? true;
     });
   }
 
   Future<void> _salvarConfiguracao() async {
+    if (tipoSelecionado == null) return;
+
     final prefs = await SharedPreferences.getInstance();
-
-    tiposSelecionados.forEach((tipo, isSelected) {
-      prefs.setBool('anticoncepcional_${tipo}_status', isSelected);
-    });
-
+    await prefs.setString('anticoncepcional_tipo', tipoSelecionado!);
     await prefs.setBool('anticoncepcional_usoContinuo', usoContinuo);
 
-    final respostaAnticoncepcional = tiposSelecionados.entries
-        .where((entry) => entry.value)
-        .map((entry) => entry.key)
-        .join(', ');
+    final respostaAnticoncepcional =
+        tipoSelecionado ==
+                'Nenhum' // Se a opção for "Nenhum"
+            ? 'Nenhum anticoncepcional'
+            : 'Tipo: $tipoSelecionado | Uso contínuo: ${usoContinuo ? "Sim" : "Não"}';
 
     final historico = Historico(
       data: DateTime.now().toIso8601String().substring(0, 10),
       tipo: 'Anticoncepcional',
-      anticoncepcional:
-          'Tipo: $respostaAnticoncepcional | Uso contínuo: ${usoContinuo ? "Sim" : "Não"}',
+      anticoncepcional: respostaAnticoncepcional,
     );
 
     await HistoricoDao().inserir(historico);
@@ -77,115 +71,80 @@ class _TelaAnticoncepcionalState extends State<TelaAnticoncepcional> {
           style: TextStyle(color: Colors.pink),
         ),
       ),
-       body: Padding(
+      body: Padding(
         padding: const EdgeInsets.fromLTRB(20, 20, 20, 60),
         child: Column(
-          // Conteúdo da tela (rolável)
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Selecione o anticoncepcional que você usa (ou nenhum):',
-                    style: TextStyle(color: Colors.white70, fontSize: 16),
-                  ),
-                  const SizedBox(height: 10),
-
-                  // Adicionando a opção "Nenhum"
-                  SwitchListTile(
-                    activeColor: Colors.pink,
-                    title: const Text(
-                      'Nenhum',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                    value: tiposSelecionados.values.every(
-                      (selected) => !selected,
-                    ),
-                    onChanged: (valor) {
-                      setState(() {
-                        // Se "Nenhum" for selecionado, desmarcamos todos os outros
-                        if (valor) {
-                          tiposSelecionados.updateAll((key, value) => false);
-                        }
-                      });
-                    },
-                  ),
-
-                  // Usar SwitchListTile para comportamento on/off, mas garantir apenas um tipo selecionado
-                  ...tiposAnticoncepcionais.map((tipo) {
-                    return SwitchListTile(
-                      activeColor: Colors.pink,
-                      title: Text(
-                        tipo,
-                        style: const TextStyle(color: Colors.white),
-                      ),
-                      value: tiposSelecionados[tipo] ?? false,
-                      onChanged: (valor) {
-                        setState(() {
-                          // Quando um tipo for selecionado, desmarcamos todos os outros (exceto "Nenhum")
-                          if (valor) {
-                            tiposSelecionados.updateAll(
-                              (key, value) => key == tipo ? true : false,
-                            );
-                          } else {
-                            tiposSelecionados[tipo] = false;
-                          }
-                        });
-                      },
-                    );
-                  }).toList(),
-
-                  const SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        'Uso contínuo?',
-                        style: TextStyle(color: Colors.white70, fontSize: 16),
-                      ),
-                      Switch(
-                        value: usoContinuo,
-                        activeColor: Colors.pink,
-                        onChanged:
-                            (valor) => setState(() => usoContinuo = valor),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 80), // Ajuste para não cobrir o botão
-                ],
-              ),
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Selecione o tipo de anticoncepcional que você usa:',
+              style: TextStyle(color: Colors.white70, fontSize: 16),
             ),
-          ),
+            const SizedBox(height: 10),
+            ...tiposAnticoncepcionais.map((tipo) {
+              return RadioListTile<String>(
+                activeColor: Colors.pink,
+                title: Text(tipo, style: const TextStyle(color: Colors.white)),
+                value: tipo,
+                groupValue: tipoSelecionado,
+                onChanged: (valor) => setState(() => tipoSelecionado = valor),
+              );
+            }).toList(),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Uso contínuo?',
+                  style: TextStyle(color: Colors.white70, fontSize: 16),
+                ),
+                Switch(
+                  activeColor: Colors.pink,
+                  value: usoContinuo,
+                  onChanged: (valor) => setState(() => usoContinuo = valor),
+                ),
+              ],
+            ),
+            const Spacer(),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.pink),
+                onPressed: () async {
+                  if (tipoSelecionado == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          'Por favor, selecione um tipo de anticoncepcional.',
+                        ),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                    return;
+                  }
 
-          // Botão fixo no rodapé
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.pink),
-              onPressed: () async {
-                await _salvarConfiguracao();
+                  await _salvarConfiguracao();
 
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      'Salvo: ${tiposSelecionados.entries.where((entry) => entry.value).map((entry) => entry.key).join(', ')} - ${usoContinuo ? "Uso contínuo" : "Em pausa"}',
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'Salvo: ${tipoSelecionado == 'Nenhum' ? 'Nenhum anticoncepcional' : '$tipoSelecionado - ${usoContinuo ? "Uso contínuo" : "Em pausa"}'}',
+                      ),
+                      backgroundColor: Colors.green,
                     ),
-                    backgroundColor: Colors.green,
+                  );
+                },
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 14),
+                  child: Text(
+                    'Salvar configurações',
+                    style: TextStyle(fontSize: 16),
                   ),
-                );
-              },
-              child: const Padding(
-                padding: EdgeInsets.symmetric(vertical: 14),
-                child: Text(
-                  'Salvar configurações',
-                  style: TextStyle(fontSize: 16),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
