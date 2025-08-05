@@ -16,19 +16,38 @@ dependencies:
   shared_preferences: ^2.1.1
   sqflite: ^2.3.0
   path: ^1.8.3
+  windows_notification: ^1.3.0
   sqflite_common_ffi:
+  flutter_local_notifications: ^12.0.0
+  
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
   flutter_launcher_icons: ^0.13.1
- 
 
 flutter:
   uses-material-design: true
   assets:
-    - assets/mestruacao.png
+    - assets/leve.png
+    - assets/Medio.png
+    - assets/Intenso.png
+    - assets/Muito.png
+    - assets/Sem-dor.png
+    - assets/Colica.png
+    - assets/Ovulacao.png
+    - assets/Lombar.png
+    - assets/Absorvente.png
+    - assets/Protetor.png
+    - assets/Coletor.png
+    - assets/Calcinha.png
+    - assets/Protegido.png
+    - assets/Desprotegido.png
+    - assets/Feito-a-sos.png
+    - assets/Nao-houve.png
+    - assets/logo-removebg-preview.png
+    - assets/logo.jpeg
 
 flutter_icons:
   android: true

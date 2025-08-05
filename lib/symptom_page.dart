@@ -176,31 +176,50 @@ class _TelaSintomasState extends State<TelaSintomas> {
   }
 
   // WIDGET PERSONALIZADO PARA BOTÕES DE SELEÇÃO (Ícone + texto)
-  Widget botaoSelecao(
-    String texto,
-    IconData icone, {
-    bool selecionado = false,
-    required VoidCallback aoClicar,
-  }) {
-    return GestureDetector(
-      onTap: aoClicar,
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: selecionado ? Colors.pink : Colors.grey[850],
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.pinkAccent.withOpacity(0.3)),
-            ),
-            child: Icon(icone, color: Colors.white, size: 48),
+Widget botaoSelecao(
+  String texto,
+  IconData icone, {
+  bool selecionado = false,
+  required VoidCallback aoClicar,
+}) {
+  return GestureDetector(
+    onTap: aoClicar,
+    child: Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: selecionado ? Colors.pink : Colors.grey[800],
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.pinkAccent.withOpacity(0.3)),
           ),
-          const SizedBox(height: 4),
-          Text(texto, style: const TextStyle(color: Colors.white70)),
-        ],
-      ),
-    );
-  }
+          child: Image.asset(
+            'assets/${texto.toLowerCase()
+                .replaceAll(' ', '-')
+                .replaceAll('ã', 'a')
+                .replaceAll('á', 'a')
+                .replaceAll('â', 'a')
+                .replaceAll('é', 'e')
+                .replaceAll('ê', 'e')
+                .replaceAll('í', 'i')
+                .replaceAll('ó', 'o')
+                .replaceAll('õ', 'o')
+                .replaceAll('ç', 'c')}.png',
+            width: 48,
+            height: 48,
+            fit: BoxFit.contain,
+            errorBuilder: (context, error, stackTrace) {
+              return Icon(icone, color: Colors.white, size: 48);
+            },
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(texto, style: const TextStyle(color: Colors.white70)),
+      ],
+    ),
+  );
+}
+
 
   // WIDGET PARA CRIAR SEÇÕES COM TÍTULO E BOTÕES (exemplo: fluxo, sintomas)
   Widget secao(String titulo, List<Widget> botoes) {
