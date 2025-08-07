@@ -18,7 +18,7 @@ dependencies:
   path: ^1.8.3
   windows_notification: ^1.3.0
   sqflite_common_ffi:
-  flutter_local_notifications: ^12.0.0
+  smooth_page_indicator: ^1.1.0
   
 
 dev_dependencies:

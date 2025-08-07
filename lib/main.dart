@@ -11,6 +11,7 @@ import 'dart:convert';
 // IMPORTAÇÕES DOS ARQUIVOS INTERNOS
 import 'symptom_page.dart';
 import 'profile_page.dart';
+import 'tutorial_page.dart';
 
 // INICIALIZAÇÃO DO APP
 void main() async {
@@ -21,19 +22,23 @@ void main() async {
 
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('pt_BR', null);
-  runApp(const AppCalendario());
+  final prefs = await SharedPreferences.getInstance();
+  final jaViuTutorial = prefs.getBool('jaViuTutorial') ?? false;
+
+  runApp(AppCalendario(jaViuTutorial: jaViuTutorial));
 }
 
 // WIDGET PRINCIPAL DO APP
 class AppCalendario extends StatelessWidget {
-  const AppCalendario({super.key});
+  final bool jaViuTutorial;
+
+  const AppCalendario({super.key, required this.jaViuTutorial});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Calendário Menstrual',
       debugShowCheckedModeBanner: false,
-      home: const TelaCalendario(),
       theme: ThemeData.dark().copyWith(
         primaryColor: Colors.pink,
         scaffoldBackgroundColor: Colors.black,
@@ -42,6 +47,7 @@ class AppCalendario extends StatelessWidget {
           bodyMedium: const TextStyle(color: Colors.white),
         ),
       ),
+      home: jaViuTutorial ? const TelaCalendario() : const TutorialPage(),
     );
   }
 }
@@ -319,11 +325,9 @@ class _TelaCalendarioState extends State<TelaCalendario> {
     return Scaffold(
       backgroundColor: Colors.black,
       body: SafeArea(
-  child: SingleChildScrollView(
-    physics: const AlwaysScrollableScrollPhysics(),
-    child: Column(
-      children: [
-        const SizedBox(height: 16),
+        child: Column(
+          children: [
+            const SizedBox(height: 16),
 
             // CABEÇALHO: Nome do mês e duração do ciclo + botão de info
             Row(
