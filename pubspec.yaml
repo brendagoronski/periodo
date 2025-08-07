@@ -36,7 +36,8 @@ flutter:
     - assets/Calcinha.png
     - assets/logo-removebg-preview.png
     - assets/logo.jpeg
-
+    - assets/mestruacao.png
+    
 flutter_icons:
   android: true
   ios: true

@@ -319,9 +319,11 @@ class _TelaCalendarioState extends State<TelaCalendario> {
     return Scaffold(
       backgroundColor: Colors.black,
       body: SafeArea(
-        child: Column(
-          children: [
-            const SizedBox(height: 16),
+  child: SingleChildScrollView(
+    physics: const AlwaysScrollableScrollPhysics(),
+    child: Column(
+      children: [
+        const SizedBox(height: 16),
 
             // CABEÇALHO: Nome do mês e duração do ciclo + botão de info
             Row(

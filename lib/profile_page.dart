@@ -22,114 +22,105 @@ class TelaPerfil extends StatelessWidget {
           'Perfil de Saúde',
           style: TextStyle(
             color: Colors.pink,
-            fontWeight: FontWeight.bold, // Título em negrito
+            fontWeight: FontWeight.bold,
             fontSize: 24,
           ),
         ),
         centerTitle: true,
-        elevation: 0, // Remove a sombra da AppBar para deixar mais limpo
+        elevation: 0,
       ),
 
-      // CORPO PRINCIPAL - Conteúdo do perfil dentro de SafeArea e Padding
+      // CORPO PRINCIPAL COM ROLAGEM
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 20,
-            vertical: 20,
-          ), // Ajuste no padding
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // Botões para navegação
-              botaoPerfil(context, "Histórico De Saúde", Icons.history, () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const TelaHistorico(),
-                  ),
-                );
-              }),
-              const SizedBox(
-                height: 20,
-              ), // Aumentei o espaçamento entre os botões
-
-              botaoPerfil(context, "Anticoncepcional", Icons.medication, () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const TelaAnticoncepcional(),
-                  ),
-                );
-              }),
-              const SizedBox(
-                height: 20,
-              ), // Aumentei o espaçamento entre os botões
-
-              botaoPerfil(
-                context,
-                "Personalize Seu Monitoramento",
-                Icons.tune,
-                () {
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+          child: SingleChildScrollView(
+            // ADICIONADO AQUI
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Botões para navegação
+                botaoPerfil(context, "Histórico De Saúde", Icons.history, () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const TelaPersonalizacao(),
+                      builder: (context) => const TelaHistorico(),
                     ),
                   );
-                },
-              ),
+                }),
+                const SizedBox(height: 20),
 
-              const SizedBox(
-                height: 60,
-              ), // Reduzi o espaçamento antes da imagem
-              // Imagem ilustrativa com borda suave e largura igual aos botões
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.pink, width: 2),
+                botaoPerfil(context, "Anticoncepcional", Icons.medication, () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const TelaAnticoncepcional(),
+                    ),
+                  );
+                }),
+                const SizedBox(height: 20),
+
+                botaoPerfil(
+                  context,
+                  "Personalize Seu Monitoramento",
+                  Icons.tune,
+                  () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const TelaPersonalizacao(),
+                      ),
+                    );
+                  },
                 ),
-                child: SizedBox(
-                  width: double.infinity, // Largura igual aos botões
-                  height: 160, // Tamanho da imagem
-                  child: Image.asset(
-                    'assets/mestruacao.png',
-                    fit: BoxFit.contain,
+
+                const SizedBox(height: 60),
+
+                // Imagem ilustrativa
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.pink, width: 2),
+                  ),
+                  child: SizedBox(
+                    width: double.infinity,
+                    height: 160,
+                    child: Image.asset(
+                      'assets/mestruacao.png',
+                      fit: BoxFit.contain,
+                    ),
                   ),
                 ),
-              ),
 
-              const SizedBox(
-                height: 10,
-              ), // Reduzi o espaçamento entre a imagem e o texto
+                const SizedBox(height: 10),
 
-              const Spacer(), // Empurra o conteúdo abaixo para o final
-              // Texto de privacidade
-              const Text(
-                'Suas informações estão 100% protegidas,\n'
-                'nenhum dos dados informados no seu aplicativo será\n'
-                'redirecionado para terceiros.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
+                // Texto de privacidade
+                const Text(
+                  'Suas informações estão 100% protegidas,\n'
+                  'nenhum dos dados informados no seu aplicativo será\n'
+                  'redirecionado para terceiros.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-              const SizedBox(
-                height: 16,
-              ), // Ajuste de espaçamento antes da barra de navegação
-            ],
+
+                const SizedBox(height: 16),
+              ],
+            ),
           ),
         ),
       ),
 
-      // RODAPÉ - Barra de navegação inferior
+      // BARRA DE NAVEGAÇÃO INFERIOR
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Colors.black,
         selectedItemColor: Colors.pink,
         unselectedItemColor: Colors.white54,
-        currentIndex: 2, // Perfil ativo
+        currentIndex: 2,
         onTap: (index) {
           if (index == 0) {
             Navigator.pushReplacement(
@@ -145,7 +136,6 @@ class TelaPerfil extends StatelessWidget {
               ),
             );
           }
-          // index 2 = já está na tela de perfil
         },
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Início'),
@@ -156,7 +146,7 @@ class TelaPerfil extends StatelessWidget {
     );
   }
 
-  // MÉTODO AUXILIAR - Botão estilizado
+  // BOTÃO PERSONALIZADO
   Widget botaoPerfil(
     BuildContext context,
     String texto,
@@ -165,13 +155,13 @@ class TelaPerfil extends StatelessWidget {
   ) {
     return SizedBox(
       width: double.infinity,
-      height: 55, // Ajustei para um pouco maior para conforto
+      height: 55,
       child: ElevatedButton.icon(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.pink,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12), // Bordas mais arredondadas
+            borderRadius: BorderRadius.circular(12),
           ),
         ),
         icon: Icon(icone, color: Colors.white),
@@ -179,7 +169,7 @@ class TelaPerfil extends StatelessWidget {
           texto,
           style: const TextStyle(
             color: Colors.white,
-            fontWeight: FontWeight.bold, // Deixando o texto mais forte
+            fontWeight: FontWeight.bold,
             fontSize: 16,
           ),
         ),
