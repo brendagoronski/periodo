@@ -30,22 +30,10 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - assets/leve.png
-    - assets/Medio.png
-    - assets/Intenso.png
-    - assets/Muito.png
-    - assets/Sem-dor.png
-    - assets/Colica.png
-    - assets/Ovulacao.png
-    - assets/Lombar.png
     - assets/Absorvente.png
     - assets/Protetor.png
     - assets/Coletor.png
     - assets/Calcinha.png
-    - assets/Protegido.png
-    - assets/Desprotegido.png
-    - assets/Feito-a-sos.png
-    - assets/Nao-houve.png
     - assets/logo-removebg-preview.png
     - assets/logo.jpeg
 
