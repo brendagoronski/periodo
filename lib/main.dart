@@ -12,6 +12,7 @@ import 'dart:convert';
 import 'symptom_page.dart';
 import 'profile_page.dart';
 import 'tutorial_page.dart';
+import 'notification.dart';
 
 // INICIALIZAÇÃO DO APP
 void main() async {
@@ -22,6 +23,10 @@ void main() async {
 
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('pt_BR', null);
+  
+  // Inicializar notificações
+  await PeriodNotification().initNotifications();
+  
   final prefs = await SharedPreferences.getInstance();
   final jaViuTutorial = prefs.getBool('jaViuTutorial') ?? false;
 
@@ -304,13 +309,20 @@ class _TelaCalendarioState extends State<TelaCalendario> {
           actions: [
             TextButton(
               child: const Text("Salvar", style: TextStyle(color: Colors.pink)),
-              onPressed: () {
+              onPressed: () async {
                 setState(() {
                   _duracaoCiclo = int.tryParse(cicloCtrl.text) ?? 28;
                   _duracaoMenstruacao = int.tryParse(menstruacaoCtrl.text) ?? 5;
                   _calcularPrevisoes();
                   _salvarDados();
                 });
+                
+                // Notificar sobre mudança de ciclo
+                if (_diasMenstruada.isNotEmpty) {
+                  final ultimaData = _diasMenstruada.reduce((a, b) => a.isAfter(b) ? a : b);
+                  await PeriodNotification().atualizarUltimaMenstruacao(ultimaData, cicloDias: _duracaoCiclo);
+                }
+                
                 Navigator.pop(context);
               },
             ),
@@ -413,6 +425,12 @@ class _TelaCalendarioState extends State<TelaCalendario> {
                   }
                   _salvarDados();
                   _calcularPrevisoes();
+                  
+                  // Enviar notificação se há dados de menstruação
+                  if (_diasMenstruada.isNotEmpty) {
+                    final ultimaData = _diasMenstruada.reduce((a, b) => a.isAfter(b) ? a : b);
+                    await PeriodNotification().atualizarUltimaMenstruacao(ultimaData, cicloDias: _duracaoCiclo);
+                  }
                 }
               },
 
@@ -580,14 +598,29 @@ class _TelaCalendarioState extends State<TelaCalendario> {
               ),
             ),
 
-            // Botão para alterar duração do ciclo e menstruação
-            TextButton.icon(
-              onPressed: _alterarCiclo,
-              icon: const Icon(Icons.settings, color: Colors.pink),
-              label: const Text(
-                "Alterar ciclo",
-                style: TextStyle(color: Colors.pink),
-              ),
+            // Botões de configuração e teste
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                TextButton.icon(
+                  onPressed: _alterarCiclo,
+                  icon: const Icon(Icons.settings, color: Colors.pink),
+                  label: const Text(
+                    "Alterar ciclo",
+                    style: TextStyle(color: Colors.pink),
+                  ),
+                ),
+                TextButton.icon(
+                  onPressed: () async {
+                    await PeriodNotification().testNotification();
+                  },
+                  icon: const Icon(Icons.notifications, color: Colors.green),
+                  label: const Text(
+                    "Testar Notificação",
+                    style: TextStyle(color: Colors.green),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -644,6 +677,12 @@ class _TelaCalendarioState extends State<TelaCalendario> {
               }
               _salvarDados();
               _calcularPrevisoes();
+              
+              // Enviar notificação se há dados de menstruação
+              if (_diasMenstruada.isNotEmpty) {
+                final ultimaData = _diasMenstruada.reduce((a, b) => a.isAfter(b) ? a : b);
+                await PeriodNotification().atualizarUltimaMenstruacao(ultimaData, cicloDias: _duracaoCiclo);
+              }
             }
           } else if (index == 2) {
             Navigator.push(

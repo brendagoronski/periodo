@@ -42,4 +42,12 @@ class HistoricoDao {
     final db = await DatabaseProvider().database;
     return await db.delete(tableName); // Deleta todos os registros
   }
+
+  // 🔹 NOVA FUNÇÃO: Deletar passando o objeto Historico
+  Future<int> deletarHistorico(Historico historico) async {
+    if (historico.id == null) {
+      throw ArgumentError('O histórico precisa ter um ID para ser deletado.');
+    }
+    return await deletar(historico.id!);
+  }
 }
