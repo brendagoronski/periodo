@@ -1,4 +1,14 @@
 // lib/notification.dart
+// ------------------------------------------------------------
+// Módulo responsável por gerenciar TODA a lógica de notificações
+// locais do aplicativo (Android/iOS/desktop onde aplicável).
+// Aqui centralizamos:
+// - inicialização do plugin de notificações
+// - pedido de permissões
+// - agendamento de lembretes (1 dia antes, no dia, fértil, ovulação, atraso)
+// - envio de notificações imediatas para feedback
+// - cancelamento de todas as notificações
+// ------------------------------------------------------------
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -42,7 +52,7 @@ class PeriodNotification {
         if (Platform.isAndroid) {
           final androidImpl =
               _plugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
-          await androidImpl?.requestPermission();
+          await androidImpl?.requestNotificationsPermission();
         } else if (Platform.isIOS) {
           final iosImpl =
               _plugin.resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>();
@@ -128,7 +138,7 @@ class PeriodNotification {
     final proximaMenstruacao = dataUltimaMenstruacao.add(Duration(days: cicloDias));
     final hoje = DateTime.now();
 
-    // Notificação 3 dias antes
+    // Notificação 3 dias antes (mantida)
     final tresDiasAntes = proximaMenstruacao.subtract(const Duration(days: 3));
     if (tresDiasAntes.isAfter(hoje)) {
       await _scheduleNotification(
@@ -139,24 +149,94 @@ class PeriodNotification {
       );
     }
 
-    // Notificação 1 dia antes
+    // Notificação 1 dia antes às 18:00 com mensagem personalizada
     final umDiaAntes = proximaMenstruacao.subtract(const Duration(days: 1));
-    if (umDiaAntes.isAfter(hoje)) {
+    final umDiaAntesAs18 = DateTime(
+      umDiaAntes.year,
+      umDiaAntes.month,
+      umDiaAntes.day,
+      18,
+      0,
+    );
+    if (umDiaAntesAs18.isAfter(hoje)) {
       await _scheduleNotification(
         2,
         'Lembrete do Ciclo',
-        'Sua menstruação pode começar amanhã!',
-        umDiaAntes,
+        'oii diva, se prepara que amanhã vem',
+        umDiaAntesAs18,
       );
     }
 
-    // Notificação no dia
-    if (proximaMenstruacao.isAfter(hoje)) {
+    // Período fértil e ovulação
+    final ovulacao = proximaMenstruacao.subtract(const Duration(days: 14));
+    final inicioFertil = ovulacao.subtract(const Duration(days: 3));
+
+    // Início do período fértil às 09:00
+    final inicioFertilAs09 = DateTime(
+      inicioFertil.year,
+      inicioFertil.month,
+      inicioFertil.day,
+      9,
+      0,
+    );
+    if (inicioFertilAs09.isAfter(hoje)) {
+      await _scheduleNotification(
+        4,
+        'Período fértil',
+        'olha o neném',
+        inicioFertilAs09,
+      );
+    }
+
+    // Dia da ovulação às 09:00
+    final ovulacaoAs09 = DateTime(
+      ovulacao.year,
+      ovulacao.month,
+      ovulacao.day,
+      9,
+      0,
+    );
+    if (ovulacaoAs09.isAfter(hoje)) {
+      await _scheduleNotification(
+        5,
+        'Ovulação',
+        'Hoje é o dia da ovulação.',
+        ovulacaoAs09,
+      );
+    }
+
+    // Notificação no dia às 09:00
+    final noDiaAs09 = DateTime(
+      proximaMenstruacao.year,
+      proximaMenstruacao.month,
+      proximaMenstruacao.day,
+      9,
+      0,
+    );
+    if (noDiaAs09.isAfter(hoje)) {
       await _scheduleNotification(
         3,
         'Lembrete do Ciclo',
-        'Sua menstruação pode ter começado hoje!',
-        proximaMenstruacao,
+        ' ela veio?',
+        noDiaAs09,
+      );
+    }
+
+    // Atraso de 3 dias às 09:00
+    final atraso3Dias = proximaMenstruacao.add(const Duration(days: 3));
+    final atraso3DiasAs09 = DateTime(
+      atraso3Dias.year,
+      atraso3Dias.month,
+      atraso3Dias.day,
+      9,
+      0,
+    );
+    if (atraso3DiasAs09.isAfter(hoje)) {
+      await _scheduleNotification(
+        6,
+        'Atraso menstrual',
+        'oii, diva, sua menstruação está atrasada 3 dias — é normal; se tiver dúvidas, procure orientação.',
+        atraso3DiasAs09,
       );
     }
   }
@@ -187,8 +267,7 @@ class PeriodNotification {
         body,
         _convertToTZDateTime(scheduledDate),
         platformDetails,
-        androidAllowWhileIdle: true,
-        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       );
       debugPrint('Notificação programada para: $scheduledDate');
     } catch (e) {
@@ -215,12 +294,12 @@ class PeriodNotification {
     if (daysLeft > 0) {
       await showImmediateNotification(
         '✅ Menstruação Registrada!',
-        'Próximo período previsto em $daysLeft dias. Notificações programadas!',
+        'Próximo ciclo em $daysLeft dias. Te lembro 1 dia antes às 18:00.',
       );
     } else {
       await showImmediateNotification(
         '✅ Menstruação Registrada!',
-        'Seu período pode ter começado hoje. Notificações programadas!',
+        'Hoje é o dia. Ela veio?',
       );
     }
     

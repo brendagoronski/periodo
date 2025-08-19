@@ -4,6 +4,7 @@ import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 import 'main.dart';
 
+/// Tela de tutorial/boas-vindas com 4 páginas e indicador.
 class TutorialPage extends StatefulWidget {
   const TutorialPage({super.key});
 
@@ -12,7 +13,10 @@ class TutorialPage extends StatefulWidget {
 }
 
 class _TutorialPageState extends State<TutorialPage> {
+  /// Controla a página atual do tutorial.
   final PageController _controller = PageController();
+
+  /// Indica se estamos na última página para exibir o botão "Começar".
   bool isLastPage = false;
 
   @override
@@ -53,6 +57,8 @@ class _TutorialPageState extends State<TutorialPage> {
               ),
             ),
             const SizedBox(height: 20),
+            // Rodapé alterna entre botão de "Começar" (última página)
+            // e os botões Pular/Próximo com o indicador de páginas.
             isLastPage
                 ? SizedBox(
                   width: double.infinity,
@@ -128,6 +134,7 @@ class _TutorialPageState extends State<TutorialPage> {
     );
   }
 
+  /// Constrói uma página do tutorial com ícone, título e descrição.
   Widget _buildPage({
     required String title,
     required String description,
@@ -156,6 +163,7 @@ class _TutorialPageState extends State<TutorialPage> {
     );
   }
 
+  /// Constrói a página que explica a legenda e o cálculo do calendário.
   Widget _buildLegendPage() {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -183,6 +191,7 @@ class _TutorialPageState extends State<TutorialPage> {
     );
   }
 
+  /// Item de legenda (cor + descrição) usado na última página.
   Widget _legendItem(Color color, String text) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),

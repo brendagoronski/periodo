@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dao/historico_dao.dart';
 import 'model/historico_model.dart';
+import 'responsive.dart';
 
 class TelaHistorico extends StatefulWidget {
   const TelaHistorico({super.key});
@@ -89,6 +90,10 @@ class _TelaHistoricoState extends State<TelaHistorico> {
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    final maxW = getMaxContentWidth(width);
+    final pagePadding = getPagePadding(width);
+
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
@@ -105,63 +110,72 @@ class _TelaHistoricoState extends State<TelaHistorico> {
           ),
         ],
       ),
-      body: FutureBuilder<List<Historico>>(
-        future: _historicosFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(
-              child: Text(
-                'Erro ao carregar histórico',
-                style: TextStyle(color: Colors.red),
-              ),
-            );
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(
-              child: Text(
-                'Nenhum registro encontrado. Salve algum dado para ver aqui.',
-                style: TextStyle(color: Colors.white70, fontSize: 16),
-                textAlign: TextAlign.center,
-              ),
-            );
-          } else {
-            final historicos = snapshot.data!;
-            return ListView.builder(
-              itemCount: historicos.length,
-              itemBuilder: (context, index) {
-                final h = historicos[index];
-                return Card(
-                  color: Colors.grey[900],
-                  margin: const EdgeInsets.symmetric(
-                    vertical: 8,
-                    horizontal: 16,
-                  ),
-                  child: ListTile(
-                    title: Text(
-                      h.tipo,
-                      style: const TextStyle(
-                        color: Colors.pink,
-                        fontWeight: FontWeight.bold,
-                      ),
+      body: Align(
+        alignment: Alignment.topCenter,
+        child: Padding(
+          padding: pagePadding,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: maxW),
+            child: FutureBuilder<List<Historico>>(
+              future: _historicosFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return const Center(
+                    child: Text(
+                      'Erro ao carregar histórico',
+                      style: TextStyle(color: Colors.red),
                     ),
-                    subtitle: Text(
-                      _construirDescricao(h),
-                      style: const TextStyle(color: Colors.white70),
+                  );
+                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const Center(
+                    child: Text(
+                      'Nenhum registro encontrado. Salve algum dado para ver aqui.',
+                      style: TextStyle(color: Colors.white70, fontSize: 16),
+                      textAlign: TextAlign.center,
                     ),
-                    trailing: Text(
-                      h.data,
-                      style: const TextStyle(
-                        color: Colors.white38,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ),
-                );
+                  );
+                } else {
+                  final historicos = snapshot.data!;
+                  return ListView.builder(
+                    itemCount: historicos.length,
+                    itemBuilder: (context, index) {
+                      final h = historicos[index];
+                      return Card(
+                        color: Colors.grey[900],
+                        margin: const EdgeInsets.symmetric(
+                          vertical: 8,
+                          horizontal: 0,
+                        ),
+                        child: ListTile(
+                          title: Text(
+                            h.tipo,
+                            style: const TextStyle(
+                              color: Colors.pink,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          subtitle: Text(
+                            _construirDescricao(h),
+                            style: const TextStyle(color: Colors.white70),
+                          ),
+                          trailing: Text(
+                            h.data,
+                            style: const TextStyle(
+                              color: Colors.white38,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                }
               },
-            );
-          }
-        },
+            ),
+          ),
+        ),
       ),
     );
   }

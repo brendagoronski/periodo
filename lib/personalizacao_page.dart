@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dao/historico_dao.dart';
 import 'model/historico_model.dart';
 
+/// Tela para personalizar quais itens a usuária deseja monitorar.
 class TelaPersonalizacao extends StatefulWidget {
   const TelaPersonalizacao({super.key});
 
@@ -11,6 +12,7 @@ class TelaPersonalizacao extends StatefulWidget {
 }
 
 class _TelaPersonalizacaoState extends State<TelaPersonalizacao> {
+  /// Flags que representam as preferências de monitoramento do app.
   bool monitorarFluxo = true;
   bool monitorarDores = true;
   bool monitorarColeta = true;
@@ -23,6 +25,7 @@ class _TelaPersonalizacaoState extends State<TelaPersonalizacao> {
     _carregarPreferencias();
   }
 
+  /// Lê as preferências salvas no dispositivo e popula as flags.
   Future<void> _carregarPreferencias() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -35,6 +38,7 @@ class _TelaPersonalizacaoState extends State<TelaPersonalizacao> {
     });
   }
 
+  /// Persiste as preferências e registra um item no histórico com o snapshot atual.
   Future<void> _salvarPreferencias() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('monitorarFluxo', monitorarFluxo);
@@ -56,6 +60,7 @@ class _TelaPersonalizacaoState extends State<TelaPersonalizacao> {
     await HistoricoDao().inserir(historico);
   }
 
+  /// Constrói um switch de preferências com título e callback.
   Widget _construtorSwitch(
     String titulo,
     bool valor,
