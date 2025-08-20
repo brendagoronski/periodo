@@ -40,10 +40,10 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // Prepara localização para datas no formato pt_BR.
   await initializeDateFormatting('pt_BR', null);
-  
+
   // Inicializa as notificações (permissões e plugin), apenas uma vez.
   await PeriodNotification().initNotifications();
-  
+
   // Preferências locais: usado antes para decidir se mostra tutorial.
   final prefs = await SharedPreferences.getInstance();
   final jaViuTutorial = prefs.getBool('jaViuTutorial') ?? false;
@@ -77,7 +77,7 @@ class AppCalendario extends StatelessWidget {
         ),
       ),
       // Define a tela inicial (neste momento sempre o calendário).
-      home: const TelaCalendario(),
+      home: jaViuTutorial ? const TelaCalendario() : const TutorialPage(),
     );
   }
 }
@@ -365,14 +365,19 @@ class _TelaCalendarioState extends State<TelaCalendario> {
                   _calcularPrevisoes();
                   _salvarDados();
                 });
-                
+
                 // Notificar sobre mudança de ciclo: reprograma notificações futuras
                 // com base na última menstruação registrada.
                 if (_diasMenstruada.isNotEmpty) {
-                  final ultimaData = _diasMenstruada.reduce((a, b) => a.isAfter(b) ? a : b);
-                  await PeriodNotification().atualizarUltimaMenstruacao(ultimaData, cicloDias: _duracaoCiclo);
+                  final ultimaData = _diasMenstruada.reduce(
+                    (a, b) => a.isAfter(b) ? a : b,
+                  );
+                  await PeriodNotification().atualizarUltimaMenstruacao(
+                    ultimaData,
+                    cicloDias: _duracaoCiclo,
+                  );
                 }
-                
+
                 Navigator.pop(context);
               },
             ),
@@ -432,7 +437,10 @@ class _TelaCalendarioState extends State<TelaCalendario> {
 
                       // Botão para mostrar legenda e explicações
                       IconButton(
-                        icon: const Icon(Icons.info_outline, color: Colors.pink),
+                        icon: const Icon(
+                          Icons.info_outline,
+                          color: Colors.pink,
+                        ),
                         onPressed: _mostrarInformacoes,
                       ),
                     ],
@@ -447,7 +455,9 @@ class _TelaCalendarioState extends State<TelaCalendario> {
                     lastDay: DateTime.utc(2030, 12, 31),
                     focusedDay: _diaEmFoco,
                     calendarFormat: CalendarFormat.month,
-                    availableCalendarFormats: const {CalendarFormat.month: 'Mês'},
+                    availableCalendarFormats: const {
+                      CalendarFormat.month: 'Mês',
+                    },
                     headerStyle: const HeaderStyle(formatButtonVisible: false),
 
                     // Ao selecionar um dia, abre a tela de sintomas desse dia
@@ -470,7 +480,8 @@ class _TelaCalendarioState extends State<TelaCalendario> {
                       );
 
                       // Se retornou dados, atualiza estado local e salva
-                      if (resultado != null && resultado is Map<String, dynamic>) {
+                      if (resultado != null &&
+                          resultado is Map<String, dynamic>) {
                         setState(() {
                           final dia = _normalizarData(diaSelecionado);
                           final temFluxo = resultado['fluxo'] != null;
@@ -486,8 +497,13 @@ class _TelaCalendarioState extends State<TelaCalendario> {
 
                         // Atualizar notificações com base na última menstruação registrada
                         if (_diasMenstruada.isNotEmpty) {
-                          final ultimaData = _diasMenstruada.reduce((a, b) => a.isAfter(b) ? a : b);
-                          await PeriodNotification().atualizarUltimaMenstruacao(ultimaData, cicloDias: _duracaoCiclo);
+                          final ultimaData = _diasMenstruada.reduce(
+                            (a, b) => a.isAfter(b) ? a : b,
+                          );
+                          await PeriodNotification().atualizarUltimaMenstruacao(
+                            ultimaData,
+                            cicloDias: _duracaoCiclo,
+                          );
                         }
                       }
                     },
@@ -500,7 +516,9 @@ class _TelaCalendarioState extends State<TelaCalendario> {
                         // Flags para saber se o dia pertence a uma das listas previstas.
                         final isPrevisto = _diasPrevistos.contains(normalizado);
                         final isFertil = _diasFertilidade.contains(normalizado);
-                        final isOvu = _diaOvulacao != null && _normalizarData(_diaOvulacao!) == normalizado;
+                        final isOvu =
+                            _diaOvulacao != null &&
+                            _normalizarData(_diaOvulacao!) == normalizado;
 
                         // Define a cor de fundo do dia conforme os destaques.
                         Color? bg;
@@ -515,15 +533,33 @@ class _TelaCalendarioState extends State<TelaCalendario> {
                         }
 
                         // Marca de relação sexual (ícone pequeno no canto superior direito)
-                        final relacao = _sintomasPorDia[normalizado]?['relacao'];
+                        final relacao =
+                            _sintomasPorDia[normalizado]?['relacao'];
                         Widget? marker;
                         if (relacao != null) {
-                          marker = {
-                            'Protegido': const Icon(Icons.favorite, size: 14, color: Colors.red),
-                            'Sem proteção': const Icon(Icons.child_friendly, size: 14, color: Colors.yellow),
-                            'Feito a sós': const Icon(Icons.disc_full, size: 14, color: Colors.pink),
-                            'Não houve': const Icon(Icons.thumb_down, size: 14, color: Colors.blue),
-                          }[relacao];
+                          marker =
+                              {
+                                'Protegido': const Icon(
+                                  Icons.favorite,
+                                  size: 14,
+                                  color: Colors.red,
+                                ),
+                                'Sem proteção': const Icon(
+                                  Icons.child_friendly,
+                                  size: 14,
+                                  color: Colors.yellow,
+                                ),
+                                'Feito a sós': const Icon(
+                                  Icons.disc_full,
+                                  size: 14,
+                                  color: Colors.pink,
+                                ),
+                                'Não houve': const Icon(
+                                  Icons.thumb_down,
+                                  size: 14,
+                                  color: Colors.blue,
+                                ),
+                              }[relacao];
                         }
                         // Constrói o bloco do dia com cor de fundo e, se houver, um marcador no canto.
                         return Stack(
@@ -538,7 +574,10 @@ class _TelaCalendarioState extends State<TelaCalendario> {
                                 child: Text(
                                   '${day.day}',
                                   style: TextStyle(
-                                    color: bg == null ? Colors.white : Colors.black,
+                                    color:
+                                        bg == null
+                                            ? Colors.white
+                                            : Colors.black,
                                   ),
                                 ),
                               ),
@@ -582,7 +621,10 @@ class _TelaCalendarioState extends State<TelaCalendario> {
                         onPressed: () async {
                           await PeriodNotification().testNotification();
                         },
-                        icon: const Icon(Icons.notifications, color: Colors.green),
+                        icon: const Icon(
+                          Icons.notifications,
+                          color: Colors.green,
+                        ),
                         label: const Text(
                           'Testar Notificação',
                           style: TextStyle(color: Colors.green),
