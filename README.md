@@ -1,148 +1,225 @@
-README - App Calendário Menstrual Flutter
-Este aplicativo foi desenvolvido para ajudar você a acompanhar seu ciclo menstrual de forma simples, visual e personalizada. Ele é uma ferramenta para que você entenda melhor seu corpo, registrando seus dias menstruados, sintomas, métodos de coleta utilizados e detalhes sobre sua vida sexual, tudo isso para que você possa se planejar e cuidar de si mesma com mais autonomia e segurança.
 
-Como usar o aplicativo
-Ao abrir o app, você verá um calendário mensal. Os dias que você marcou como menstruados aparecerão destacados em rosa forte, enquanto os próximos dias previstos para sua menstruação aparecem em um tom de rosa mais claro. O app também indica o período fértil em verde e o dia da ovulação em roxo — essas informações são calculadas automaticamente com base nos dados que você registrou até então.
+# 📅 App Calendário Menstrual Flutter
 
-Para adicionar ou editar informações de um dia, basta tocar no dia desejado no calendário. Isso abrirá uma tela onde você poderá registrar:
+> Um aplicativo para te ajudar a acompanhar seu ciclo menstrual de forma simples, visual e personalizada.  
+> Feito com ❤️ em Flutter.
 
-O fluxo menstrual daquele dia (leve, médio, intenso, etc.);
+---
 
-Sintomas que você estiver sentindo, como cólica, dor lombar, ausência de dor, entre outros;
+## ✨ O que é esse app?
 
-O método de coleta que utilizou (absorvente, coletor, calcinha, etc.);
+Este aplicativo foi desenvolvido com o objetivo de **te ajudar a entender melhor o seu corpo** e te dar mais **autonomia, consciência e segurança** sobre o seu ciclo menstrual.
 
-Detalhes sobre sua relação sexual (protegida, sem proteção, feita a sós, ou não houve).
+Com ele, você pode registrar:
 
-Após registrar esses dados, eles são salvos automaticamente, para que você possa consultar ou modificar sempre que quiser.
+- ✅ Dias em que menstruou
+- ✅ Sintomas (como cólica, dor lombar, ausência de dor etc.)
+- ✅ Método de coleta utilizado (absorvente, coletor, calcinha absorvente, etc.)
+- ✅ Informações sobre a sua vida sexual (com ou sem proteção, a sós ou não houve)
 
-Além disso, você pode ajustar as configurações do ciclo, como a duração média do ciclo e da menstruação, para que as previsões fiquem mais precisas e personalizadas para você.
+---
 
-Entradas, Processamento e Saídas do Aplicativo
-Entrada: Os dados que você registra diariamente, como o fluxo, sintomas, método de coleta e detalhes da relação sexual para cada dia específico.
+## 🗂️ Visualização no calendário
 
-Processamento: O app armazena essas informações localmente no seu celular e, com base nos dias menstruados que você marcou, calcula previsões para seus próximos ciclos, período fértil e dia da ovulação. Essas previsões são feitas com base na média dos seus últimos ciclos.
+Ao abrir o app, você verá um calendário mensal bem colorido e intuitivo:
 
-Saída: Você visualiza todas essas informações diretamente no calendário, com cores e indicações claras, e tem acesso às telas onde pode inserir e editar seus dados.
+| Cor          | Significado                        |
+|--------------|------------------------------------|
+| 🩸 Rosa forte | Dias que você marcou como menstruada |
+| 🌸 Rosa claro | Dias previstos para a próxima menstruação |
+| 🌿 Verde       | Período fértil (7 dias)             |
+| 💜 Roxo        | Dia da ovulação                     |
 
-Como o código funciona por dentro
-O aplicativo é estruturado principalmente em duas telas que conversam entre si:
+Essas previsões são calculadas **automaticamente** com base nas informações que você já registrou.
 
-Tela Calendário
-Esta é a tela principal que você vê ao abrir o app. Ela exibe o calendário com os dias que você marcou como menstruados, as previsões para os próximos ciclos, o período fértil e o dia da ovulação, cada um com sua cor para facilitar a visualização.
+---
 
-Além disso, nessa tela você pode:
+## 📝 Como registrar seus dados
 
-Alterar as configurações do ciclo (duração do ciclo e duração da menstruação);
+Basta **tocar em um dia** no calendário para abrir a tela de sintomas e registrar:
 
-Acessar a tela de sintomas ao tocar em um dia;
+- 💧 **Fluxo menstrual**: leve, médio, intenso ou muito
+- 🤕 **Sintomas**: sem dor, cólica, ovulação, lombar.
+- 🩹 **Método de coleta**: absorvente, coletor, calcinha absorvente etc.
+- ❤️ **Relação sexual**: protegida, sem proteção, feita a sós ou nenhuma
 
-Visualizar informações explicativas (como uma legenda das cores);
+Os botões são interativos e mudam de cor quando selecionados ✅  
+Os dados são **salvos automaticamente** e podem ser **editados ou removidos** quando você quiser.
 
-Navegar para outras telas usando a barra inferior.
+---
 
-O código dessa tela gerencia as variáveis que guardam as informações, calcula as previsões, e salva ou carrega tudo do armazenamento local do celular, garantindo que seus dados não se percam.
+## 🔄 Opção de RESET (Limpar todos os dados)
 
-Tela Sintomas
-Quando você toca em um dia no calendário, esta tela abre para que você registre detalhes específicos daquele dia.
+Caso você queira **começar tudo de novo**, o app oferece uma opção de **Reset**.
 
-Aqui você pode:
+> ⚠️ **Atenção:** ao usar o reset, **todos os seus registros serão apagados** do armazenamento local do celular, incluindo:
+> - Dias menstruados
+> - Sintomas
+> - Configurações do ciclo
 
-Selecionar o fluxo menstrual;
+Essa opção existe para te dar **controle total sobre os seus dados**.
 
-Escolher os sintomas que estiver sentindo;
+---
 
-Indicar o método de coleta utilizado;
+## ⚙️ Configurações do ciclo
 
-Informar sobre a relação sexual.
+Você pode ajustar:
 
-Os botões mudam de cor quando selecionados, facilitando a interação. Você pode salvar os dados ou optar por remover o registro daquele dia. Ao salvar ou remover, a tela retorna para o calendário atualizando as informações.
+- 🌀 **Duração média do seu ciclo** (ex: 28 dias)
+- 🩸 **Duração média da menstruação** (ex: 5 dias)
 
-Explicação detalhada das partes importantes do código
-Abertura do aplicativo: função main
-dart
-Copiar
-Editar
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await initializeDateFormatting('pt_BR', null);
-  runApp(const AppCalendario());
-}
-Esta é a porta de entrada do app.
+Essas informações ajudam o app a **calcular com mais precisão**:
 
-WidgetsFlutterBinding.ensureInitialized() prepara o Flutter para carregar recursos.
+- Quando será a próxima menstruação
+- Quando será seu dia de ovulação
+- Quando será o período fértil (7 dias antes e depois da ovulação)
 
-initializeDateFormatting('pt_BR', null) configura o formato de datas para português do Brasil, garantindo que nomes dos meses e dias apareçam corretamente.
+---
 
-runApp inicia o app carregando a primeira tela.
+## 🧠 Como o app funciona por dentro
 
-A classe AppCalendario
-Define o tema geral do app (fundo preto, destaques em rosa), e qual será a tela inicial (o calendário).
+### 🎯 Entrada
+Você insere dados diários como:
 
-A classe TelaCalendario
-Exibe o calendário interativo.
+- Fluxo menstrual
+- Sintomas
+- Método de coleta
+- Relação sexual
 
-Controla os dias marcados como menstruados.
-
-Armazena os sintomas por dia.
-
-Permite alterar as configurações do ciclo.
-
-Calcula e exibe as previsões de menstruação, ovulação e fertilidade.
-
-Principais variáveis:
-
-_diaEmFoco: o dia que o calendário está mostrando.
-
-_diasMenstruada: conjunto de dias que você marcou como menstruada.
-
-_sintomasPorDia: mapa que guarda os sintomas e dados de cada dia.
-
-_duracaoCiclo e _duracaoMenstruacao: médias usadas para calcular previsões.
-
-Cálculo das previsões
+### 🧮 Processamento
 O app:
 
-Identifica os inícios dos seus ciclos baseado nos dias marcados.
+- Armazena os dados localmente no celular e no bando de dados
+- Identifica o início de cada ciclo com base nos dias menstruados
+- Calcula:
+  - Média da duração do ciclo
+  - Média da duração da menstruação
+- Usa essas médias para prever:
+  - Próxima menstruação
+  - Dia da ovulação
+  - Período fértil
 
-Se houver pelo menos 3 ciclos registrados, calcula a média da duração para ajustar as previsões.
+Se você tiver pelo menos **3 ciclos registrados**, as previsões ficam **ainda mais personalizadas**.
 
-Calcula quando será a próxima menstruação, o dia da ovulação e o período fértil (7 dias).
+### 📤 Saída
+Tudo isso é exibido de forma **visual e colorida** no calendário.  
+Você também pode voltar e **editar ou apagar qualquer dia** quando quiser.
 
-Atualiza o calendário para mostrar essas previsões com cores específicas.
+---
 
-Salvar e carregar dados
-Utiliza o pacote shared_preferences para guardar seus dados no celular e recuperá-los sempre que o app for aberto, garantindo que nada se perca.
+## 🧩 Estrutura do código (resumida)
 
-Tela de Sintomas
-Aparece ao clicar em um dia.
+| Parte do código                | O que faz                                                                                               |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------- |
+| `main.dart`                    | é o coração do projeto, onde está o calendário menstrual, os cálculos de ciclo, ovulação e dias férteis
+|                                | e a navegação por abas. 
+| `notification.dart`            | Gerencia **notificações ** (alertas sobre ciclo, sintomas, lembretes).                            |
+| `responsive.dart`              | Utilitário para deixar a interface adaptável a diferentes telas (celular, tablet, desktop).             |
+| `tutorial_page.dart`           | Exibe o **tutorial inicial** para explicar como usar o app.                                             |
+| `profile_page.dart`            | Tela de **perfil e configurações** (onde é possível redefinir dados, personalizar e acessar opções).    |
+| `personalizacao_page.dart`     | Permite ajustar o que será monitorado.                               |
+| `symptom_page.dart`            | Tela de registro de **sintomas, fluxo, método de coleta e relação sexual**.                             |
+| `anticoncepcional_page.dart`   | Página para registrar/gerenciar informações sobre **uso de anticoncepcional**.                          |
+| `historico_page.dart`          | Tela de **histórico completo** dos registros anteriores do ciclo.                                       |
+| `shared_preferences`           | Usado para salvar configurações rápidas (como preferências).                              |
+| `sqflite / sqflite_common_ffi` | Banco de dados SQLite usado para **armazenar o histórico do ciclo, sintomas e registros persistentes**. |
 
-Permite selecionar informações específicas do dia.
 
-Os botões mostram seleção por cores.
+---
 
-Você pode salvar ou remover os dados daquele dia.
+## 📚 Conceitos básicos do código
 
-Ao salvar ou remover, as informações voltam para o calendário e atualizam o que é exibido.
+| Conceito       | Explicação simples |
+|----------------|-------------------|
+| 🏗️ **Classe**    | Um molde que define uma parte do app (ex: TelaCalendario) |
+| 🧾 **Função**    | Conjunto de instruções que executa uma tarefa específica |
+| 📦 **Variável**  | Espaço na memória onde guardamos informações (ex: dias menstruados) |
+| 📚 **Pacote**    | Biblioteca que traz funcionalidades prontas (ex: calendário visual) |
+| 🔄 **Estado**    | Dados que mudam com o uso (ex: sintomas do dia) |
 
-Conceitos básicos para entender o código
-Classe: um molde que define uma parte do app, como a tela do calendário ou a tela de sintomas.
+---
 
-Função: um conjunto de instruções que executa uma tarefa específica, como salvar dados ou calcular previsões.
+## 💾 Temos
 
-Variável: um espaço onde o app guarda informações temporariamente, como os dias menstruados.
 
-Pacote: uma biblioteca pronta que traz funcionalidades, por exemplo, o calendário visual.
+- ✅ Funcionamento offline
+- ✅ Dados persistentes mesmo fechando o app
 
-Estado: os dados que podem mudar durante o uso do app, como os dias que você marca ou os sintomas registrados.
+---
 
-Resumo das funcionalidades do app
-Funcionalidade	Descrição
-Marcar dias menstruados	Registrar os dias que você está menstruada
-Registrar sintomas	Guardar os sintomas e informações diárias
-Previsão automática	Calcular próximos ciclos, ovulação e fertilidade
-Visualização colorida	Facilitar o entendimento pelo calendário
-Armazenamento local	Salvar dados no celular para que não se percam
+## 🛠️ Como instalar o aplicativo
 
-Finalizando
-Este app é muito mais que um calendário: é um companheiro que respeita seu ritmo e ajuda você a cuidar da sua saúde com mais consciência e tranquilidade. Ele traz informações essenciais, personalizadas para o seu corpo, para que você se sinta mais segura e preparada para cada fase do seu ciclo.
+Se você quer **clonar o projeto e rodar no seu computador com Flutter**, siga os passos:
+
+### ✅ Pré-requisitos
+
+- Ter o [Flutter SDK](https://docs.flutter.dev/get-started/install) instalado
+- Ter o Android Studio ou VS Code configurado com Flutter
+- Ter um emulador ou celular com depuração USB ativada
+
+### 💻 Instalação
+
+```bash
+# Clone o repositório
+git clone https://github.com/brendagoronski/periodo.git
+
+# Entre na pasta
+cd periodo
+
+# Instale as dependências
+flutter pub get
+
+# Rode o app
+flutter run
+````
+
+Se quiser rodar no navegador (Flutter Web):
+
+```bash
+flutter run -d chrome
+```
+
+---
+
+## 📊 Resumo geral das funcionalidades
+
+| Funcionalidade             | Descrição                                         |
+| -------------------------- | ------------------------------------------------- |
+| 📌 Marcar dias menstruados | Registrar os dias que você menstruou              |
+| 🩺 Registrar sintomas      | Guardar sintomas diários                          |
+| 🩹 Método de coleta        | Registrar absorvente, coletor, calcinha, etc.     |
+| ❤️ Relação sexual          | Registrar tipo de relação (ou nenhuma)            |
+| 🔮 Previsão automática     | Calcular próximos ciclos, ovulação e fertilidade  |
+| 🎨 Visualização colorida   | Facilitar o entendimento com cores no calendário  |
+| ⚙️ Configurações do ciclo  | Personalizar a duração do seu ciclo e menstruação |
+| 💾 Armazenamento local     | Tudo salvo no seu celular com privacidade         |
+| 🔁 Reset total             | Apagar todos os dados e começar do zero           |
+
+---
+
+## 👩‍💻 Autores(as)
+
+Feito com ❤️ em Flutter.
+
+**Brenda **Goronski** **e** **João** **Hermes**
+📸 Instagram: [@goronskibrenda](https://instagram.com/goronskibrenda) [@joaopschmt](https://instagram.com/joaopschmt)
+🐙 GitHub: [github.com/brendagoronski](https://github.com/brendagoronski),[github.com/JoaoHermesS](https://github.com/JoaoHermesS)
+
+
+Sinta-se à vontade para dar sugestões, contribuir com o projeto ou apenas mandar um oi ✨
+
+---
+
+## 📜 Licença
+
+Este projeto é livre para uso pessoal.
+Sinta-se à vontade para estudar, aprender e adaptar para você mesma.
+Se for publicar ou distribuir, lembre-se de dar os devidos créditos 🌷
+
+---
+
+> 🌸 *"Cuidar de si mesma também é tecnologia."*
+> Obrigada por usar esse app 💗
+
+```
+
