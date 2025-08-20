@@ -148,21 +148,26 @@ class _TelaCalendarioState extends State<TelaCalendario> {
   // CALCULA OS DIAS DE MENSTRUAÇÃO, OVULAÇÃO E FERTILIDADE
   // A partir do último registro e/ou média de ciclos detectada, preenche as listas de previsão.
   void _calcularPrevisoes() {
-    if (_diasMenstruada.isEmpty) {
-      setState(() {
-        _diasPrevistos.clear();
-        _diasFertilidade.clear();
-        _diaOvulacao = null;
-      });
-      return;
-    }
+  if (_diasMenstruada.isEmpty) {
+    _diasPrevistos.clear();
+    _diasFertilidade.clear();
+    _diaOvulacao = null;
+    return;
+  }
+
+  //  Garantir ciclo mínimo de 14 dias
+  if (_duracaoCiclo < 21) {
+    _duracaoCiclo = 21;
+  }
 
     // Última data registrada como menstruação.
     final ultimaData = _diasMenstruada.reduce((a, b) => a.isAfter(b) ? a : b);
     // Atualiza a lista de inícios de ciclo (a partir de gaps entre dias registrados).
     _detectarIniciosDeCiclo();
 
-    // Se houver pelo menos 3 ciclos, calcula a média de duração entre inícios.
+    // Se houver pelo menos 3 ciclos E o usuário não definiu manualmente a duração,
+    // calcula a média de duração entre inícios.
+    // Nota: Não sobrescreve _duracaoCiclo se foi definido manualmente pelo usuário
     if (_iniciosDeCiclo.length >= 3) {
       final diferencas = <int>[];
       for (int i = 1; i < _iniciosDeCiclo.length; i++) {
@@ -170,31 +175,35 @@ class _TelaCalendarioState extends State<TelaCalendario> {
           _iniciosDeCiclo[i].difference(_iniciosDeCiclo[i - 1]).inDays,
         );
       }
-      _duracaoCiclo =
-          (diferencas.reduce((a, b) => a + b) / diferencas.length).round();
+      // Só atualiza se não foi definido manualmente (mantém o valor padrão ou definido pelo usuário)
+      if (_duracaoCiclo == 28) { // valor padrão
+        _duracaoCiclo =
+            (diferencas.reduce((a, b) => a + b) / diferencas.length).round();
+      }
     }
 
-    // Próxima menstruação prevista: últimaData + duração média.
-    final proximaMenstruacao = ultimaData.add(Duration(days: _duracaoCiclo));
-    // Lista de dias da menstruação prevista (duracaoMenstruacao dias).
-    final diasMenstruacao = List.generate(
-      _duracaoMenstruacao,
-      (i) => _normalizarData(proximaMenstruacao.add(Duration(days: i))),
-    );
+// Próxima menstruação prevista = última menstruação + duração do ciclo
+final proximaMenstruacao = ultimaData.add(Duration(days: _duracaoCiclo));
 
-    // Dia estimado de ovulação: ~14 dias antes do início da menstruação.
-    final ovulacao = proximaMenstruacao.subtract(const Duration(days: 14));
-    // Período fértil: 3 dias antes e 3 dias após a ovulação (total 7 dias).
-    final diasFertilidade = List.generate(
-      7,
-      (i) => _normalizarData(ovulacao.subtract(Duration(days: 3 - i))),
-    );
+// Lista de dias da próxima menstruação prevista
+final diasMenstruacao = List.generate(
+  _duracaoMenstruacao,
+  (i) => _normalizarData(proximaMenstruacao.add(Duration(days: i))),
+);
 
-    setState(() {
-      _diasPrevistos = diasMenstruacao;
-      _diasFertilidade = diasFertilidade;
-      _diaOvulacao = ovulacao;
-    });
+// Ovulação = última menstruação + (duração do ciclo - 14)
+final ovulacao = ultimaData.add(Duration(days: _duracaoCiclo - 14));
+
+// Período fértil = 3 dias antes até 3 dias depois da ovulação
+final diasFertilidade = List.generate(
+  7,
+  (i) => _normalizarData(ovulacao.add(Duration(days: i - 3))),
+);
+
+
+    _diasPrevistos = diasMenstruacao;
+    _diasFertilidade = diasFertilidade;
+    _diaOvulacao = ovulacao;
   }
 
   // DETECTA O INÍCIO DE NOVOS CICLOS
@@ -364,13 +373,21 @@ class _TelaCalendarioState extends State<TelaCalendario> {
           actions: [
             TextButton(
               child: const Text("Salvar", style: TextStyle(color: Colors.pink)),
-              onPressed: () async {
-                setState(() {
-                  _duracaoCiclo = int.tryParse(cicloCtrl.text) ?? 28;
-                  _duracaoMenstruacao = int.tryParse(menstruacaoCtrl.text) ?? 5;
-                  _calcularPrevisoes();
-                  _salvarDados();
-                });
+            onPressed: () async {
+  // Atualiza as durações
+  _duracaoCiclo = int.tryParse(cicloCtrl.text) ?? 28;
+  _duracaoMenstruacao = int.tryParse(menstruacaoCtrl.text) ?? 5;
+
+  // 🚨 Garantir ciclo mínimo de 14 dias
+  if (_duracaoCiclo < 21) {
+    _duracaoCiclo = 21;
+  }
+
+  // Recalcula previsões
+  _calcularPrevisoes();
+  setState(() {});
+  await _salvarDados();
+                
 
                 // Notificar sobre mudança de ciclo: reprograma notificações futuras
                 // com base na última menstruação registrada.
@@ -493,18 +510,17 @@ class _TelaCalendarioState extends State<TelaCalendario> {
                         // Se retornou dados, atualiza estado local e salva
                         if (resultado != null &&
                             resultado is Map<String, dynamic>) {
-                          setState(() {
-                            final dia = _normalizarData(diaSelecionado);
-                            final temFluxo = resultado['fluxo'] != null;
-                            if (temFluxo) {
-                              _diasMenstruada.add(dia);
-                            } else {
-                              _diasMenstruada.remove(dia);
-                            }
-                            _sintomasPorDia[dia] = resultado;
-                            _calcularPrevisoes();
-                            _salvarDados();
-                          });
+                          final dia = _normalizarData(diaSelecionado);
+                          final temFluxo = resultado['fluxo'] != null;
+                          if (temFluxo) {
+                            _diasMenstruada.add(dia);
+                          } else {
+                            _diasMenstruada.remove(dia);
+                          }
+                          _sintomasPorDia[dia] = resultado;
+                          _calcularPrevisoes();
+                          setState(() {});
+                          await _salvarDados();
 
                           // Atualizar notificações com base na última menstruação registrada
                           if (_diasMenstruada.isNotEmpty) {
@@ -752,18 +768,17 @@ class _TelaCalendarioState extends State<TelaCalendario> {
 
             // Se retornou dados, atualiza estado local e salva
             if (resultado != null && resultado is Map<String, dynamic>) {
-              setState(() {
-                final dia = _normalizarData(diaAtual);
-                final temFluxo = resultado['fluxo'] != null;
-                if (temFluxo) {
-                  _diasMenstruada.add(dia);
-                } else {
-                  _diasMenstruada.remove(dia);
-                }
-                _sintomasPorDia[dia] = resultado;
-                _calcularPrevisoes();
-                _salvarDados();
-              });
+              final dia = _normalizarData(diaAtual);
+              final temFluxo = resultado['fluxo'] != null;
+              if (temFluxo) {
+                _diasMenstruada.add(dia);
+              } else {
+                _diasMenstruada.remove(dia);
+              }
+              _sintomasPorDia[dia] = resultado;
+              _calcularPrevisoes();
+              setState(() {});
+              await _salvarDados();
 
               // Atualizar notificações com base na última menstruação registrada
               if (_diasMenstruada.isNotEmpty) {
