@@ -201,11 +201,12 @@ flutter run -d chrome
 
 Feito com ❤️ em Flutter.
 
-**Brenda **Goronski** **e** **João** **Hermes**
-📸 Instagram: [@goronskibrenda](https://instagram.com/goronskibrenda) [@joaopschmt](https://instagram.com/joaopschmt)
-🐙 GitHub: [github.com/brendagoronski](https://github.com/brendagoronski),[github.com/JoaoHermesS](https://github.com/JoaoHermesS)
-
-
+ **Brenda** **Goronski** 
+📸 Instagram: [@goronskibrenda](https://instagram.com/goronskibrenda)
+🐙 GitHub: [github.com/brendagoronski](https://github.com/brendagoronski)
+ **João** **Hermes**
+📸 Instagram:[@joaopschmt](https://instagram.com/joaopschmt)
+🐙 GitHub:[github.com/JoaoHermesS](https://github.com/JoaoHermesS)
 Sinta-se à vontade para dar sugestões, contribuir com o projeto ou apenas mandar um oi ✨
 
 ---
