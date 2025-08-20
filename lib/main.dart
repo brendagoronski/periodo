@@ -733,16 +733,49 @@ class _TelaCalendarioState extends State<TelaCalendario> {
         selectedItemColor: Colors.pink,
         unselectedItemColor: Colors.white54,
         currentIndex: 0,
-        onTap: (index) {
+        onTap: (index) async {
           if (index == 1) {
             // Atalho para abrir a tela de sintomas do dia atual.
-            Navigator.push(
+            final diaAtual = DateTime.now();
+            final dataNormalizada = _normalizarData(diaAtual);
+            final sintomasSalvos = _sintomasPorDia[dataNormalizada];
+
+            final resultado = await Navigator.push(
               context,
               MaterialPageRoute(
-                builder:
-                    (context) => TelaSintomas(diaSelecionado: DateTime.now()),
+                builder: (context) => TelaSintomas(
+                  diaSelecionado: diaAtual,
+                  dadosIniciais: sintomasSalvos,
+                ),
               ),
             );
+
+            // Se retornou dados, atualiza estado local e salva
+            if (resultado != null && resultado is Map<String, dynamic>) {
+              setState(() {
+                final dia = _normalizarData(diaAtual);
+                final temFluxo = resultado['fluxo'] != null;
+                if (temFluxo) {
+                  _diasMenstruada.add(dia);
+                } else {
+                  _diasMenstruada.remove(dia);
+                }
+                _sintomasPorDia[dia] = resultado;
+                _calcularPrevisoes();
+                _salvarDados();
+              });
+
+              // Atualizar notificações com base na última menstruação registrada
+              if (_diasMenstruada.isNotEmpty) {
+                final ultimaData = _diasMenstruada.reduce(
+                  (a, b) => a.isAfter(b) ? a : b,
+                );
+                await PeriodNotification().atualizarUltimaMenstruacao(
+                  ultimaData,
+                  cicloDias: _duracaoCiclo,
+                );
+              }
+            }
           } else if (index == 2) {
             // Abre a tela de perfil.
             Navigator.push(
