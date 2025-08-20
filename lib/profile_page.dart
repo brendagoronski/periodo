@@ -12,8 +12,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'responsive.dart';
 
 // WIDGET PRINCIPAL - Tela de Perfil do Usuário
-class TelaPerfil extends StatelessWidget {
+class TelaPerfil extends StatefulWidget {
   const TelaPerfil({super.key});
+
+  @override
+  State<TelaPerfil> createState() => _TelaPerfilState();
+}
+
+class _TelaPerfilState extends State<TelaPerfil> {
 
   Future<void> _resetApp(BuildContext context) async {
     // Apagar histórico do banco
@@ -57,7 +63,7 @@ class TelaPerfil extends StatelessWidget {
     final pagePadding = getPagePadding(width);
 
     return Scaffold(
-      backgroundColor: Colors.black, // Fundo preto para o tema escuro
+      backgroundColor: Colors.black,
       // BARRA SUPERIOR - AppBar com título centralizado
       appBar: AppBar(
         backgroundColor: Colors.black,
@@ -121,6 +127,8 @@ class TelaPerfil extends StatelessWidget {
 
                   SizedBox(height: isMobile(width) ? 16 : 20),
 
+
+
                   // Novo botão: Resetar o app
                   botaoPerfil(
                     context,
@@ -158,11 +166,11 @@ class TelaPerfil extends StatelessWidget {
                     'nenhum dos dados informados no seu aplicativo será\n'
                     'redirecionado para terceiros.',
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: isMobile(width) ? 12 : 14,
-                      fontWeight: FontWeight.bold,
-                    ),
+                                         style: TextStyle(
+                       color: Colors.white,
+                       fontSize: isMobile(width) ? 12 : 14,
+                       fontWeight: FontWeight.bold,
+                     ),
                   ),
 
                   SizedBox(height: isMobile(width) ? 12 : 16),
@@ -173,9 +181,9 @@ class TelaPerfil extends StatelessWidget {
         ),
       ),
 
-      // BARRA DE NAVEGAÇÃO INFERIOR
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Colors.black,
+             // BARRA DE NAVEGAÇÃO INFERIOR
+       bottomNavigationBar: BottomNavigationBar(
+         backgroundColor: Colors.black,
         selectedItemColor: Colors.pink,
         unselectedItemColor: Colors.white54,
         currentIndex: 2,

@@ -30,17 +30,20 @@ class _TutorialPageState extends State<TutorialPage> {
             // Botão de fechar no canto superior direito
             Align(
               alignment: Alignment.topRight,
-              child: IconButton(
-                icon: const Icon(Icons.close, color: Colors.white, size: 30),
-                onPressed: () async {
-                  final prefs = await SharedPreferences.getInstance();
-                  await prefs.setBool('jaViuTutorial', true);
-                  Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(
-                      builder: (_) => const TelaCalendario(),
-                    ),
-                  );
-                },
+              child: Padding(
+                padding: const EdgeInsets.only(top: 10, right: 10),
+                child: IconButton(
+                  icon: const Icon(Icons.close, color: Colors.white, size: 30),
+                  onPressed: () async {
+                    final prefs = await SharedPreferences.getInstance();
+                    await prefs.setBool('jaViuTutorial', true);
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(
+                        builder: (_) => const TelaCalendario(),
+                      ),
+                    );
+                  },
+                ),
               ),
             ),
             Expanded(
