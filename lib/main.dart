@@ -4,6 +4,7 @@ import 'dart:io';
 
 // Importa o framework UI do Flutter.
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 // SQLite para desktop (via FFI), usado quando o app roda em Windows/Linux.
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 // Widget de calendário usado na tela principal.
@@ -338,10 +339,15 @@ class _TelaCalendarioState extends State<TelaCalendario> {
               TextField(
                 controller: cicloCtrl,
                 keyboardType: TextInputType.number,
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  LengthLimitingTextInputFormatter(3),
+                ],
                 style: const TextStyle(color: Colors.white),
                 decoration: const InputDecoration(
                   labelText: "Duração do ciclo",
                   labelStyle: TextStyle(color: Colors.white),
+                  hintText: "Ex: 28",
                 ),
               ),
               TextField(
@@ -401,238 +407,320 @@ class _TelaCalendarioState extends State<TelaCalendario> {
       body: SafeArea(
         child: Align(
           alignment: Alignment.topCenter,
-          child: SingleChildScrollView(
-            padding: pagePadding,
-            child: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: maxW),
-              child: Column(
-                children: [
-                  const SizedBox(height: 16),
+          child: Scrollbar(
+            thumbVisibility: true,
+            trackVisibility: true,
+            thickness: 8,
+            radius: const Radius.circular(10),
+            child: SingleChildScrollView(
+              padding: pagePadding,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: maxW),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 16),
 
-                  // CABEÇALHO: Nome do mês e duração do ciclo + botão de info
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      // Nome do mês e ciclo atual
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              _nomeDoMes(_diaEmFoco.month),
-                              style: TextStyle(
-                                fontSize: isMobile(width) ? 24 : 28,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.pink,
-                              ),
-                            ),
-                            Text(
-                              "Ciclo: $_duracaoCiclo dias • Menstruação: $_duracaoMenstruacao dias",
-                              style: const TextStyle(color: Colors.white70),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      // Botão para mostrar legenda e explicações
-                      IconButton(
-                        icon: const Icon(
-                          Icons.info_outline,
-                          color: Colors.pink,
-                        ),
-                        onPressed: _mostrarInformacoes,
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  // CALENDÁRIO (TableCalendar): mostra mês atual e reage ao toque em dias
-                  TableCalendar(
-                    locale: 'pt_BR',
-                    firstDay: DateTime.utc(2020, 1, 1),
-                    lastDay: DateTime.utc(2030, 12, 31),
-                    focusedDay: _diaEmFoco,
-                    calendarFormat: CalendarFormat.month,
-                    availableCalendarFormats: const {
-                      CalendarFormat.month: 'Mês',
-                    },
-                    headerStyle: const HeaderStyle(formatButtonVisible: false),
-
-                    // Ao selecionar um dia, abre a tela de sintomas desse dia
-                    onDaySelected: (diaSelecionado, diaFocado) async {
-                      setState(() => _diaEmFoco = diaFocado);
-
-                      final dataNormalizada = _normalizarData(diaSelecionado);
-                      final sintomasSalvos = _sintomasPorDia[dataNormalizada];
-
-                      // Navega para a tela de sintomas, podendo retornar um Map com dados
-                      final resultado = await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder:
-                              (context) => TelaSintomas(
-                                diaSelecionado: diaSelecionado,
-                                dadosIniciais: sintomasSalvos,
-                              ),
-                        ),
-                      );
-
-                      // Se retornou dados, atualiza estado local e salva
-                      if (resultado != null &&
-                          resultado is Map<String, dynamic>) {
-                        setState(() {
-                          final dia = _normalizarData(diaSelecionado);
-                          final temFluxo = resultado['fluxo'] != null;
-                          if (temFluxo) {
-                            _diasMenstruada.add(dia);
-                          } else {
-                            _diasMenstruada.remove(dia);
-                          }
-                          _sintomasPorDia[dia] = resultado;
-                          _calcularPrevisoes();
-                          _salvarDados();
-                        });
-
-                        // Atualizar notificações com base na última menstruação registrada
-                        if (_diasMenstruada.isNotEmpty) {
-                          final ultimaData = _diasMenstruada.reduce(
-                            (a, b) => a.isAfter(b) ? a : b,
-                          );
-                          await PeriodNotification().atualizarUltimaMenstruacao(
-                            ultimaData,
-                            cicloDias: _duracaoCiclo,
-                          );
-                        }
-                      }
-                    },
-
-                    // DESTACAR DIAS ESPECIAIS
-                    calendarBuilders: CalendarBuilders(
-                      defaultBuilder: (context, day, focusedDay) {
-                        // Normaliza para comparar apenas AAAA-MM-DD.
-                        final normalizado = _normalizarData(day);
-                        // Flags para saber se o dia pertence a uma das listas previstas.
-                        final isPrevisto = _diasPrevistos.contains(normalizado);
-                        final isFertil = _diasFertilidade.contains(normalizado);
-                        final isOvu =
-                            _diaOvulacao != null &&
-                            _normalizarData(_diaOvulacao!) == normalizado;
-
-                        // Define a cor de fundo do dia conforme os destaques.
-                        Color? bg;
-                        if (_diasMenstruada.contains(normalizado)) {
-                          bg = Colors.pink;
-                        } else if (isOvu) {
-                          bg = Colors.purple;
-                        } else if (isPrevisto) {
-                          bg = Colors.pink.shade100;
-                        } else if (isFertil) {
-                          bg = Colors.green;
-                        }
-
-                        // Marca de relação sexual (ícone pequeno no canto superior direito)
-                        final relacao =
-                            _sintomasPorDia[normalizado]?['relacao'];
-                        Widget? marker;
-                        if (relacao != null) {
-                          marker =
-                              {
-                                'Protegido': const Icon(
-                                  Icons.favorite,
-                                  size: 14,
-                                  color: Colors.red,
-                                ),
-                                'Sem proteção': const Icon(
-                                  Icons.child_friendly,
-                                  size: 14,
-                                  color: Colors.yellow,
-                                ),
-                                'Feito a sós': const Icon(
-                                  Icons.disc_full,
-                                  size: 14,
+                    // CABEÇALHO: Nome do mês e duração do ciclo + botão de info
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        // Nome do mês e ciclo atual
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                _nomeDoMes(_diaEmFoco.month),
+                                style: TextStyle(
+                                  fontSize: isMobile(width) ? 24 : 28,
+                                  fontWeight: FontWeight.bold,
                                   color: Colors.pink,
                                 ),
-                                'Não houve': const Icon(
-                                  Icons.thumb_down,
-                                  size: 14,
-                                  color: Colors.blue,
-                                ),
-                              }[relacao];
-                        }
-                        // Constrói o bloco do dia com cor de fundo e, se houver, um marcador no canto.
-                        return Stack(
-                          children: [
-                            Container(
-                              margin: const EdgeInsets.all(4),
-                              decoration: BoxDecoration(
-                                color: bg,
-                                borderRadius: BorderRadius.circular(8),
                               ),
-                              child: Center(
-                                child: Text(
-                                  '${day.day}',
-                                  style: TextStyle(
-                                    color:
-                                        bg == null
-                                            ? Colors.white
-                                            : Colors.black,
-                                  ),
-                                ),
+                              Text(
+                                "Ciclo: $_duracaoCiclo dias • Menstruação: $_duracaoMenstruacao dias",
+                                style: const TextStyle(color: Colors.white70),
                               ),
-                            ),
-                            if (marker != null)
-                              Positioned(
-                                top: 2,
-                                right: 2,
-                                child: Container(
-                                  padding: const EdgeInsets.all(2),
-                                  decoration: BoxDecoration(
-                                    color: Colors.black,
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: marker,
-                                ),
-                              ),
-                          ],
-                        );
-                      },
+                            ],
+                          ),
+                        ),
+
+                        // Botão para mostrar legenda e explicações
+                        IconButton(
+                          icon: const Icon(
+                            Icons.info_outline,
+                            color: Colors.pink,
+                          ),
+                          onPressed: _mostrarInformacoes,
+                        ),
+                      ],
                     ),
-                  ),
 
-                  const SizedBox(height: 12),
+                    const SizedBox(height: 12),
 
-                  // Ações rápidas abaixo do calendário: alterar ciclo e testar notificação
-                  Wrap(
-                    spacing: 12,
-                    runSpacing: 8,
-                    alignment: WrapAlignment.center,
-                    children: [
-                      TextButton.icon(
-                        onPressed: _alterarCiclo,
-                        icon: const Icon(Icons.settings, color: Colors.pink),
-                        label: const Text(
-                          'Alterar ciclo',
-                          style: TextStyle(color: Colors.pink),
-                        ),
-                      ),
-                      TextButton.icon(
-                        onPressed: () async {
-                          await PeriodNotification().testNotification();
+                    // CALENDÁRIO (TableCalendar): mostra mês atual e reage ao toque em dias
+                    TableCalendar(
+                      locale: 'pt_BR',
+                      firstDay: DateTime.utc(2020, 1, 1),
+                      lastDay: DateTime.utc(2030, 12, 31),
+                      focusedDay: _diaEmFoco,
+                      calendarFormat: CalendarFormat.month,
+                      availableCalendarFormats: const {
+                        CalendarFormat.month: 'Mês',
+                      },
+                      headerStyle: const HeaderStyle(formatButtonVisible: false),
+
+                      // Ao selecionar um dia, abre a tela de sintomas desse dia
+                      onDaySelected: (diaSelecionado, diaFocado) async {
+                        setState(() => _diaEmFoco = diaFocado);
+
+                        final dataNormalizada = _normalizarData(diaSelecionado);
+                        final sintomasSalvos = _sintomasPorDia[dataNormalizada];
+
+                        // Navega para a tela de sintomas, podendo retornar um Map com dados
+                        final resultado = await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder:
+                                (context) => TelaSintomas(
+                                  diaSelecionado: diaSelecionado,
+                                  dadosIniciais: sintomasSalvos,
+                                ),
+                          ),
+                        );
+
+                        // Se retornou dados, atualiza estado local e salva
+                        if (resultado != null &&
+                            resultado is Map<String, dynamic>) {
+                          setState(() {
+                            final dia = _normalizarData(diaSelecionado);
+                            final temFluxo = resultado['fluxo'] != null;
+                            if (temFluxo) {
+                              _diasMenstruada.add(dia);
+                            } else {
+                              _diasMenstruada.remove(dia);
+                            }
+                            _sintomasPorDia[dia] = resultado;
+                            _calcularPrevisoes();
+                            _salvarDados();
+                          });
+
+                          // Atualizar notificações com base na última menstruação registrada
+                          if (_diasMenstruada.isNotEmpty) {
+                            final ultimaData = _diasMenstruada.reduce(
+                              (a, b) => a.isAfter(b) ? a : b,
+                            );
+                            await PeriodNotification().atualizarUltimaMenstruacao(
+                              ultimaData,
+                              cicloDias: _duracaoCiclo,
+                            );
+                          }
+                        }
+                      },
+
+                      // DESTACAR DIAS ESPECIAIS
+                      calendarBuilders: CalendarBuilders(
+                        defaultBuilder: (context, day, focusedDay) {
+                          // Normaliza para comparar apenas AAAA-MM-DD.
+                          final normalizado = _normalizarData(day);
+                          // Flags para saber se o dia pertence a uma das listas previstas.
+                          final isPrevisto = _diasPrevistos.contains(normalizado);
+                          final isFertil = _diasFertilidade.contains(normalizado);
+                          final isOvu =
+                              _diaOvulacao != null &&
+                              _normalizarData(_diaOvulacao!) == normalizado;
+
+                          // Define a cor de fundo do dia conforme os destaques.
+                          Color? bg;
+                          if (_diasMenstruada.contains(normalizado)) {
+                            bg = Colors.pink;
+                          } else if (isOvu) {
+                            bg = Colors.purple;
+                          } else if (isPrevisto) {
+                            bg = Colors.pink.shade100;
+                          } else if (isFertil) {
+                            bg = Colors.green;
+                          }
+
+                          // Marca de relação sexual (ícone pequeno no canto superior direito)
+                          final relacao =
+                              _sintomasPorDia[normalizado]?['relacao'];
+                          Widget? marker;
+                          if (relacao != null) {
+                            marker =
+                                {
+                                  'Protegido': const Icon(
+                                    Icons.favorite,
+                                    size: 14,
+                                    color: Colors.red,
+                                  ),
+                                  'Sem proteção': const Icon(
+                                    Icons.child_friendly,
+                                    size: 14,
+                                    color: Colors.yellow,
+                                  ),
+                                  'Feito a sós': const Icon(
+                                    Icons.disc_full,
+                                    size: 14,
+                                    color: Colors.pink,
+                                  ),
+                                  'Não houve': const Icon(
+                                    Icons.thumb_down,
+                                    size: 14,
+                                    color: Colors.blue,
+                                  ),
+                                }[relacao];
+                          }
+                          // Constrói o bloco do dia com cor de fundo e, se houver, um marcador no canto.
+                          return Stack(
+                            children: [
+                              Container(
+                                margin: const EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                  color: bg,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    '${day.day}',
+                                    style: TextStyle(
+                                      color:
+                                          bg == null
+                                              ? Colors.white
+                                              : Colors.black,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              if (marker != null)
+                                Positioned(
+                                  top: 2,
+                                  right: 2,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(2),
+                                    decoration: BoxDecoration(
+                                      color: Colors.black,
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: marker,
+                                  ),
+                                ),
+                            ],
+                          );
                         },
-                        icon: const Icon(
-                          Icons.notifications,
-                          color: Colors.green,
-                        ),
-                        label: const Text(
-                          'Testar Notificação',
-                          style: TextStyle(color: Colors.green),
-                        ),
+                        todayBuilder: (context, dia, _) {
+                          final data = _normalizarData(dia);
+                          final hoje = DateTime.now();
+                          Color? cor;
+
+                          if (_diasMenstruada.contains(data)) {
+                            cor = Colors.pink;
+                          } else if (_diasPrevistos.contains(data)) {
+                            cor = Colors.pink.shade100;
+                          } else if (_diaOvulacao == data) {
+                            cor = Colors.purple;
+                          } else if (_diasFertilidade.contains(data)) {
+                            cor = Colors.green;
+                          } else if (isSameDay(hoje, data)) {
+                            cor = Colors.deepPurpleAccent.shade100;
+                          }
+
+                          return Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              Container(
+                                margin: const EdgeInsets.all(4),
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  color: cor,
+                                  borderRadius: BorderRadius.circular(
+                                    isSameDay(hoje, data) ? 50 : 10,
+                                  ),
+                                ),
+                                child: Text(
+                                  '${dia.day}',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              if (_sintomasPorDia[data]?["relacao"] != null)
+                                Positioned(
+                                  top: 0,
+                                  right: 0,
+                                  child: Container(
+                                    padding: EdgeInsets.all(2),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(8),
+                                      color: Colors.black,
+                                    ),
+                                    child:
+                                        {
+                                          "Protegido": Icon(
+                                            Icons.favorite,
+                                            size: 16,
+                                            color: Colors.red,
+                                          ),
+                                          "Sem proteção": Icon(
+                                            Icons.child_friendly,
+                                            size: 16,
+                                            color: Colors.yellow,
+                                          ),
+                                          "Feito a sós": Icon(
+                                            Icons.disc_full,
+                                            size: 16,
+                                            color: Colors.pink,
+                                          ),
+                                          "Não houve": Icon(
+                                            Icons.thumb_down,
+                                            size: 16,
+                                            color: Colors.blue,
+                                          ),
+                                        }[_sintomasPorDia[data]?["relacao"]] ??
+                                        const SizedBox.shrink(),
+                                  ),
+                                ),
+                            ],
+                          );
+                        },
                       ),
-                    ],
-                  ),
-                ],
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    // Ações rápidas abaixo do calendário: alterar ciclo e testar notificação
+                    Wrap(
+                      spacing: 12,
+                      runSpacing: 8,
+                      alignment: WrapAlignment.center,
+                      children: [
+                        TextButton.icon(
+                          onPressed: _alterarCiclo,
+                          icon: const Icon(Icons.settings, color: Colors.pink),
+                          label: const Text(
+                            'Alterar ciclo',
+                            style: TextStyle(color: Colors.pink),
+                          ),
+                        ),
+                        TextButton.icon(
+                          onPressed: () async {
+                            await PeriodNotification().testNotification();
+                          },
+                          icon: const Icon(
+                            Icons.notifications,
+                            color: Colors.green,
+                          ),
+                          label: const Text(
+                            'Testar Notificação',
+                            style: TextStyle(color: Colors.green),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

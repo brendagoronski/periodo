@@ -98,9 +98,12 @@ class _TelaHistoricoState extends State<TelaHistorico> {
       backgroundColor: Colors.black,
       appBar: AppBar(
         backgroundColor: Colors.black,
-        title: const Text(
+        title: Text(
           'Histórico de Saúde',
-          style: TextStyle(color: Colors.pink),
+          style: TextStyle(
+            color: Colors.pink,
+            fontSize: isMobile(width) ? 18 : 20,
+          ),
         ),
         actions: [
           // Botão para apagar o histórico
@@ -129,10 +132,13 @@ class _TelaHistoricoState extends State<TelaHistorico> {
                     ),
                   );
                 } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(
+                  return Center(
                     child: Text(
                       'Nenhum registro encontrado. Salve algum dado para ver aqui.',
-                      style: TextStyle(color: Colors.white70, fontSize: 16),
+                      style: TextStyle(
+                        color: Colors.white70, 
+                        fontSize: isMobile(width) ? 14 : 16
+                      ),
                       textAlign: TextAlign.center,
                     ),
                   );
@@ -144,27 +150,31 @@ class _TelaHistoricoState extends State<TelaHistorico> {
                       final h = historicos[index];
                       return Card(
                         color: Colors.grey[900],
-                        margin: const EdgeInsets.symmetric(
-                          vertical: 8,
+                        margin: EdgeInsets.symmetric(
+                          vertical: isMobile(width) ? 6 : 8,
                           horizontal: 0,
                         ),
                         child: ListTile(
                           title: Text(
                             h.tipo,
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: Colors.pink,
                               fontWeight: FontWeight.bold,
+                              fontSize: isMobile(width) ? 14 : 16,
                             ),
                           ),
                           subtitle: Text(
                             _construirDescricao(h),
-                            style: const TextStyle(color: Colors.white70),
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: isMobile(width) ? 12 : 14,
+                            ),
                           ),
                           trailing: Text(
                             h.data,
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: Colors.white38,
-                              fontSize: 12,
+                              fontSize: isMobile(width) ? 10 : 12,
                             ),
                           ),
                         ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dao/historico_dao.dart';
 import 'model/historico_model.dart';
+import 'responsive.dart';
 
 /// Tela para personalizar quais itens a usuária deseja monitorar.
 class TelaPersonalizacao extends StatefulWidget {
@@ -66,8 +67,16 @@ class _TelaPersonalizacaoState extends State<TelaPersonalizacao> {
     bool valor,
     ValueChanged<bool> onChanged,
   ) {
+    final width = MediaQuery.of(context).size.width;
+    
     return SwitchListTile(
-      title: Text(titulo, style: const TextStyle(color: Colors.white)),
+      title: Text(
+        titulo, 
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: isMobile(width) ? 14 : 16,
+        )
+      ),
       value: valor,
       onChanged: onChanged,
       activeColor: Colors.pink,
@@ -77,73 +86,93 @@ class _TelaPersonalizacaoState extends State<TelaPersonalizacao> {
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    final maxW = getMaxContentWidth(width);
+    final pagePadding = getPagePadding(width);
+
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
         backgroundColor: Colors.black,
-        title: const Text(
+        title: Text(
           'Personalizar Monitoramento',
-          style: TextStyle(color: Colors.pink),
+          style: TextStyle(
+            color: Colors.pink,
+            fontSize: isMobile(width) ? 16 : 18,
+          ),
         ),
       ),
-      body: Padding(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 60),
-        child: Column(
-          children: [
-            const Text(
-              'Escolha o que deseja monitorar no seu ciclo:',
-              style: TextStyle(color: Colors.white70, fontSize: 16),
-            ),
-            const SizedBox(height: 20),
-            _construtorSwitch(
-              'Fluxo Menstrual',
-              monitorarFluxo,
-              (v) => setState(() => monitorarFluxo = v),
-            ),
-            _construtorSwitch(
-              'Dores/Sintomas',
-              monitorarDores,
-              (v) => setState(() => monitorarDores = v),
-            ),
-            _construtorSwitch(
-              'Coleta Menstrual',
-              monitorarColeta,
-              (v) => setState(() => monitorarColeta = v),
-            ),
-            _construtorSwitch(
-              'Relação Sexual',
-              monitorarRelacao,
-              (v) => setState(() => monitorarRelacao = v),
-            ),
-            _construtorSwitch(
-              'Anticoncepcional',
-              monitorarAnticoncepcional,
-              (v) => setState(() => monitorarAnticoncepcional = v),
-            ),
-            const Spacer(),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.pink),
-                onPressed: () async {
-                  await _salvarPreferencias();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Preferências salvas com sucesso!'),
-                      backgroundColor: Colors.green,
+      body: Align(
+        alignment: Alignment.topCenter,
+        child: Padding(
+          padding: pagePadding,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: maxW),
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  Text(
+                    'Escolha o que deseja monitorar no seu ciclo:',
+                    style: TextStyle(
+                      color: Colors.white70, 
+                      fontSize: isMobile(width) ? 14 : 16
                     ),
-                  );
-                },
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 14),
-                  child: Text(
-                    'Salvar Preferências',
-                    style: TextStyle(fontSize: 16),
                   ),
-                ),
+                  SizedBox(height: isMobile(width) ? 16 : 20),
+                  _construtorSwitch(
+                    'Fluxo Menstrual',
+                    monitorarFluxo,
+                    (v) => setState(() => monitorarFluxo = v),
+                  ),
+                  _construtorSwitch(
+                    'Dores/Sintomas',
+                    monitorarDores,
+                    (v) => setState(() => monitorarDores = v),
+                  ),
+                  _construtorSwitch(
+                    'Coleta Menstrual',
+                    monitorarColeta,
+                    (v) => setState(() => monitorarColeta = v),
+                  ),
+                  _construtorSwitch(
+                    'Relação Sexual',
+                    monitorarRelacao,
+                    (v) => setState(() => monitorarRelacao = v),
+                  ),
+                  _construtorSwitch(
+                    'Anticoncepcional',
+                    monitorarAnticoncepcional,
+                    (v) => setState(() => monitorarAnticoncepcional = v),
+                  ),
+                  SizedBox(height: isMobile(width) ? 40 : 60),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(backgroundColor: Colors.pink),
+                      onPressed: () async {
+                        await _salvarPreferencias();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Preferências salvas com sucesso!'),
+                            backgroundColor: Colors.green,
+                          ),
+                        );
+                      },
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: isMobile(width) ? 12 : 14),
+                        child: Text(
+                          'Salvar Preferências',
+                          style: TextStyle(
+                            fontSize: isMobile(width) ? 14 : 16,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
+          ),
         ),
       ),
     );

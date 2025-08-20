@@ -27,6 +27,22 @@ class _TutorialPageState extends State<TutorialPage> {
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
+            // Botão de fechar no canto superior direito
+            Align(
+              alignment: Alignment.topRight,
+              child: IconButton(
+                icon: const Icon(Icons.close, color: Colors.white, size: 30),
+                onPressed: () async {
+                  final prefs = await SharedPreferences.getInstance();
+                  await prefs.setBool('jaViuTutorial', true);
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(
+                      builder: (_) => const TelaCalendario(),
+                    ),
+                  );
+                },
+              ),
+            ),
             Expanded(
               child: PageView(
                 controller: _controller,

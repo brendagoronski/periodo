@@ -9,6 +9,7 @@ import 'symptom_page.dart'; // TelaSintomas
 import 'dao/historico_dao.dart';
 import 'notification.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'responsive.dart';
 
 // WIDGET PRINCIPAL - Tela de Perfil do Usuário
 class TelaPerfil extends StatelessWidget {
@@ -50,17 +51,22 @@ class TelaPerfil extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Largura atual da tela para responsividade
+    final width = MediaQuery.of(context).size.width;
+    final maxW = getMaxContentWidth(width);
+    final pagePadding = getPagePadding(width);
+
     return Scaffold(
       backgroundColor: Colors.black, // Fundo preto para o tema escuro
       // BARRA SUPERIOR - AppBar com título centralizado
       appBar: AppBar(
         backgroundColor: Colors.black,
-        title: const Text(
+        title: Text(
           'Perfil de Saúde',
           style: TextStyle(
             color: Colors.pink,
             fontWeight: FontWeight.bold,
-            fontSize: 24,
+            fontSize: isMobile(width) ? 20 : 24,
           ),
         ),
         centerTitle: true,
@@ -69,96 +75,99 @@ class TelaPerfil extends StatelessWidget {
 
       // CORPO PRINCIPAL COM ROLAGEM
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+        child: Align(
+          alignment: Alignment.topCenter,
           child: SingleChildScrollView(
-            // ADICIONADO AQUI
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                // Botões para navegação
-                botaoPerfil(context, 'Histórico De Saúde', Icons.history, () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const TelaHistorico(),
-                    ),
-                  );
-                }),
-                const SizedBox(height: 20),
-
-                botaoPerfil(context, 'Anticoncepcional', Icons.medication, () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const TelaAnticoncepcional(),
-                    ),
-                  );
-                }),
-                const SizedBox(height: 20),
-
-                botaoPerfil(
-                  context,
-                  'Personalize Seu Monitoramento',
-                  Icons.tune,
-                  () {
+            padding: pagePadding,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: maxW),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // Botões para navegação
+                  botaoPerfil(context, 'Histórico De Saúde', Icons.history, () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const TelaPersonalizacao(),
+                        builder: (context) => const TelaHistorico(),
                       ),
                     );
-                  },
-                ),
+                  }),
+                  SizedBox(height: isMobile(width) ? 16 : 20),
 
-                const SizedBox(height: 20),
+                  botaoPerfil(context, 'Anticoncepcional', Icons.medication, () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const TelaAnticoncepcional(),
+                      ),
+                    );
+                  }),
+                  SizedBox(height: isMobile(width) ? 16 : 20),
 
-                // Novo botão: Resetar o app
-                botaoPerfil(
-                  context,
-                  'Resetar Aplicativo',
-                  Icons.restart_alt,
-                  () async {
-                    await _resetApp(context);
-                  },
-                ),
-
-                const SizedBox(height: 60),
-
-                // Imagem ilustrativa
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.pink, width: 2),
+                  botaoPerfil(
+                    context,
+                    'Personalize Seu Monitoramento',
+                    Icons.tune,
+                    () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const TelaPersonalizacao(),
+                        ),
+                      );
+                    },
                   ),
-                  child: SizedBox(
-                    width: double.infinity,
-                    height: 160,
-                    child: Image.asset(
-                      'assets/mestruacao.png',
-                      fit: BoxFit.contain,
+
+                  SizedBox(height: isMobile(width) ? 16 : 20),
+
+                  // Novo botão: Resetar o app
+                  botaoPerfil(
+                    context,
+                    'Resetar Aplicativo',
+                    Icons.restart_alt,
+                    () async {
+                      await _resetApp(context);
+                    },
+                  ),
+
+                  SizedBox(height: isMobile(width) ? 40 : 60),
+
+                  // Imagem ilustrativa
+                  Container(
+                    padding: EdgeInsets.all(isMobile(width) ? 8 : 10),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.pink, width: 2),
+                    ),
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: isMobile(width) ? 120 : 160,
+                      child: Image.asset(
+                        'assets/mestruacao.png',
+                        fit: BoxFit.contain,
+                      ),
                     ),
                   ),
-                ),
 
-                const SizedBox(height: 10),
+                  SizedBox(height: isMobile(width) ? 8 : 10),
 
-                // Texto de privacidade
-                const Text(
-                  'Suas informações estão 100% protegidas,\n'
-                  'nenhum dos dados informados no seu aplicativo será\n'
-                  'redirecionado para terceiros.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
+                  // Texto de privacidade
+                  Text(
+                    'Suas informações estão 100% protegidas,\n'
+                    'nenhum dos dados informados no seu aplicativo será\n'
+                    'redirecionado para terceiros.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: isMobile(width) ? 12 : 14,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
 
-                const SizedBox(height: 16),
-              ],
+                  SizedBox(height: isMobile(width) ? 12 : 16),
+                ],
+              ),
             ),
           ),
         ),
@@ -202,9 +211,11 @@ class TelaPerfil extends StatelessWidget {
     IconData icone,
     VoidCallback onPressed,
   ) {
+    final width = MediaQuery.of(context).size.width;
+    
     return SizedBox(
       width: double.infinity,
-      height: 55,
+      height: isMobile(width) ? 50 : 55,
       child: ElevatedButton.icon(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
@@ -213,13 +224,13 @@ class TelaPerfil extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
           ),
         ),
-        icon: Icon(icone, color: Colors.white),
+        icon: Icon(icone, color: Colors.white, size: isMobile(width) ? 20 : 24),
         label: Text(
           texto,
-          style: const TextStyle(
+          style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
-            fontSize: 16,
+            fontSize: isMobile(width) ? 14 : 16,
           ),
         ),
       ),
