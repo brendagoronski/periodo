@@ -346,19 +346,21 @@ final diasFertilidade = List.generate(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
-                controller: cicloCtrl,
-                keyboardType: TextInputType.number,
-                inputFormatters: [
-                  FilteringTextInputFormatter.digitsOnly,
-                  LengthLimitingTextInputFormatter(3),
-                ],
-                style: const TextStyle(color: Colors.white),
-                decoration: const InputDecoration(
-                  labelText: "Duração do ciclo",
-                  labelStyle: TextStyle(color: Colors.white),
-                  hintText: "Ex: 28",
-                ),
-              ),
+  controller: cicloCtrl,
+  keyboardType: TextInputType.number,
+  inputFormatters: [
+    FilteringTextInputFormatter.digitsOnly,
+    LengthLimitingTextInputFormatter(3),
+  ],
+  style: const TextStyle(color: Colors.white),
+  decoration: const InputDecoration(
+    labelText: "Duração do ciclo",
+    labelStyle: TextStyle(color: Colors.white),
+    hintText: "Ex: 28",
+    helperText: "Mínimo: 21 dias (valores menores serão ajustados)",
+    helperStyle: TextStyle(color: Colors.white70, fontSize: 12),
+  ),
+),
               TextField(
                 controller: menstruacaoCtrl,
                 keyboardType: TextInputType.number,
@@ -387,6 +389,7 @@ final diasFertilidade = List.generate(
   _calcularPrevisoes();
   setState(() {});
   await _salvarDados();
+  await _carregarDados();
                 
 
                 // Notificar sobre mudança de ciclo: reprograma notificações futuras
@@ -507,20 +510,30 @@ final diasFertilidade = List.generate(
                           ),
                         );
 
-                        // Se retornou dados, atualiza estado local e salva
-                        if (resultado != null &&
-                            resultado is Map<String, dynamic>) {
-                          final dia = _normalizarData(diaSelecionado);
-                          final temFluxo = resultado['fluxo'] != null;
-                          if (temFluxo) {
-                            _diasMenstruada.add(dia);
-                          } else {
-                            _diasMenstruada.remove(dia);
-                          }
-                          _sintomasPorDia[dia] = resultado;
-                          _calcularPrevisoes();
-                          setState(() {});
-                          await _salvarDados();
+// Se retornou dados, atualiza estado local e salva
+if (resultado != null && resultado is Map<String, dynamic>) {
+  final dia = _normalizarData(diaSelecionado);
+
+  final temFluxo = resultado['fluxo'] != null;
+  final apagado = resultado['apagar'] == true; // flag vinda da tela sintomas
+
+  if (apagado) {
+    _diasMenstruada.remove(dia);
+    _sintomasPorDia.remove(dia); // 🚨 remove completamente do mapa
+  } else {
+    if (temFluxo) {
+      _diasMenstruada.add(dia);
+    } else {
+      _diasMenstruada.remove(dia);
+    }
+    _sintomasPorDia[dia] = resultado;
+  }
+
+  _calcularPrevisoes();
+  setState(() {});
+  await _salvarDados();
+  await _carregarDados();
+
 
                           // Atualizar notificações com base na última menstruação registrada
                           if (_diasMenstruada.isNotEmpty) {
@@ -767,18 +780,29 @@ final diasFertilidade = List.generate(
             );
 
             // Se retornou dados, atualiza estado local e salva
-            if (resultado != null && resultado is Map<String, dynamic>) {
-              final dia = _normalizarData(diaAtual);
-              final temFluxo = resultado['fluxo'] != null;
-              if (temFluxo) {
-                _diasMenstruada.add(dia);
-              } else {
-                _diasMenstruada.remove(dia);
-              }
-              _sintomasPorDia[dia] = resultado;
-              _calcularPrevisoes();
-              setState(() {});
-              await _salvarDados();
+if (resultado != null && resultado is Map<String, dynamic>) {
+  final dia = _normalizarData(diaAtual);
+
+  final temFluxo = resultado['fluxo'] != null;
+  final apagado = resultado['apagar'] == true;
+
+  if (apagado) {
+    _diasMenstruada.remove(dia);
+    _sintomasPorDia.remove(dia);
+  } else {
+    if (temFluxo) {
+      _diasMenstruada.add(dia);
+    } else {
+      _diasMenstruada.remove(dia);
+    }
+    _sintomasPorDia[dia] = resultado;
+  }
+
+  _calcularPrevisoes();
+  setState(() {});
+  await _salvarDados();
+  await _carregarDados();
+
 
               // Atualizar notificações com base na última menstruação registrada
               if (_diasMenstruada.isNotEmpty) {

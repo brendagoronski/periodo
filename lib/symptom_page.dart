@@ -171,7 +171,7 @@ class _TelaSintomasState extends State<TelaSintomas> {
         anticoncepcional: null,
       );
       HistoricoDao().inserir(historico);
-      Navigator.pop(context, 'remover');
+      Navigator.pop(context, {'apagar': true, 'acao': 'remover'});
     }
   }
 
